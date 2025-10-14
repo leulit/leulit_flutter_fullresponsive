@@ -37,7 +37,7 @@ Si quieres usar la versión local del paquete:
 
 1. Clona el repositorio:
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/leulit/leulit_flutter_fullresponsive.git
 cd leulit_flutter_fullresponsive
 ```
 
@@ -329,7 +329,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👥 Autor
 
-Desarrollado por [Tu Nombre]
+Desarrollado por [Leulit](https://github.com/leulit)
 
 ## 🔗 Enlaces
 
