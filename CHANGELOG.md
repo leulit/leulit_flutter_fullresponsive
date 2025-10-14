@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.1] - 2024-12-19
+### Documentation
+- **Added Comprehensive Example App**: Complete 4-page demonstration app showcasing all library features
+- **Improved pub.dev Score**: Enhanced documentation score from 10/20 to 20/20 with proper examples
+- **Example README**: Detailed guide for understanding and using all responsive features
+- **Code Samples**: Real-world usage patterns and best practices demonstration
+
+### Example Features
+- **Basic Examples**: Fundamental .w(), .h(), .sp() usage patterns
+- **Multi-Platform Demo**: Platform-specific responsive implementations  
+- **Specialized Extensions**: Complete showcase of ResponsiveSize, ResponsiveRadius, ResponsiveFlex
+- **Practical Implementation**: Real dashboard example with complex responsive layouts
+
 ## [1.4.0] - 2024-12-19
 ### Added
 - **ResponsiveSize Extension**: Nueva extensión `.size()` para iconos, padding, margins
