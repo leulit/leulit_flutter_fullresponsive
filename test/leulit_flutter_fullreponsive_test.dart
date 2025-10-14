@@ -23,7 +23,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(Container));
+      final context = tester.element(find.byType(SizedBox));
       
       // Los valores exactos dependerán del tamaño del dispositivo de test
       // Verificamos que sean valores positivos y proporcionales
@@ -61,7 +61,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(Container));
+      final context = tester.element(find.byType(SizedBox));
       
       // Verificar que los valores decimales den el mismo resultado que los porcentajes
       expect(0.5.w(context), equals(50.w(context))); // 0.5 = 50%
@@ -87,7 +87,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(Container));
+      final context = tester.element(find.byType(SizedBox));
       
       // Verificar que los valores de alta precisión sean positivos y proporcionales
       final preciseWidth = 0.076543.w(context);
@@ -169,6 +169,122 @@ void main() {
       expect(normalizeValue(25), equals(0.25));
       expect(normalizeValue(100), equals(1.0));
       expect(normalizeValue(7.6543), equals(0.076543));
+    });
+
+    testWidgets('should handle multi-platform width function', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Container(
+                    // Usando la nueva función multi-plataforma
+                    width: w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6),
+                    child: const Text('Test'),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Container));
+      
+      // Verificar que la función retorna un valor positivo
+      final multiPlatformWidth = w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6);
+      expect(multiPlatformWidth, greaterThan(0));
+      
+      // Verificar con diferentes combinaciones
+      final webWidth = w(context, web: 0.5, fallback: 0.3);
+      final mobileWidth = w(context, mobile: 0.7, fallback: 0.3);
+      
+      expect(webWidth, greaterThan(0));
+      expect(mobileWidth, greaterThan(0));
+    });
+
+    testWidgets('should handle multi-platform height function', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Container(
+                    height: h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35),
+                    child: const Text('Test'),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Container));
+      
+      // Verificar que la función retorna un valor positivo
+      final multiPlatformHeight = h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35);
+      expect(multiPlatformHeight, greaterThan(0));
+      
+      // Verificar con formato porcentaje
+      final heightPercentage = h(context, web: 20, mobile: 40, fallback: 35);
+      expect(heightPercentage, greaterThan(0));
+    });
+
+    testWidgets('should handle multi-platform font size function', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Text(
+                    'Test',
+                    style: TextStyle(
+                      fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Text));
+      
+      // Verificar que la función retorna un valor positivo
+      final multiPlatformSp = sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025);
+      expect(multiPlatformSp, greaterThan(0));
+      
+      // Verificar con formato tradicional
+      final spTraditional = sp(context, web: 2, mobile: 4, fallback: 3);
+      expect(spTraditional, greaterThan(0));
+    });
+
+    testWidgets('should throw error when no values provided to multi-platform functions', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return const Scaffold(
+                  body: Text('Test'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Text));
+      
+      // Verificar que se lance error cuando no se proporcionan valores
+      expect(() => w(context), throwsA(isA<FlutterError>()));
+      expect(() => h(context), throwsA(isA<FlutterError>()));
+      expect(() => sp(context), throwsA(isA<FlutterError>()));
     });
   });
 }

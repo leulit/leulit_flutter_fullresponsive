@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'core/screen_scaler_inherited_widget.dart';
 import 'domain/screen_info.dart';
 
@@ -104,4 +105,220 @@ extension ScreenScale on num {
     
     return baseSize * screenInfo.textScale;
   }
+}
+
+// -----------------------------------------------------------------------------
+// 3. Funciones Multi-Plataforma para Valores Específicos por Dispositivo
+// -----------------------------------------------------------------------------
+
+/// Enumeration para tipos de dispositivos
+enum DeviceType {
+  web,
+  ios,
+  android,
+  mobile, // Incluye tanto iOS como Android
+  tablet,
+  desktop // Incluye web y desktop apps
+}
+
+/// Helper para detectar el tipo de dispositivo actual
+DeviceType _getCurrentDeviceType(BuildContext context) {
+  final platform = defaultTargetPlatform;
+  final screenInfo = ScreenScalerInheritedWidget.of(context)!.info;
+  
+  // Determinar si es tablet basándose en el tamaño de pantalla
+  final isTablet = screenInfo.width >= 600;
+  
+  switch (platform) {
+    case TargetPlatform.iOS:
+      return isTablet ? DeviceType.tablet : DeviceType.ios;
+    case TargetPlatform.android:
+      return isTablet ? DeviceType.tablet : DeviceType.android;
+    case TargetPlatform.fuchsia:
+      return isTablet ? DeviceType.tablet : DeviceType.android;
+    case TargetPlatform.linux:
+    case TargetPlatform.macOS:
+    case TargetPlatform.windows:
+      return DeviceType.web;
+  }
+}
+
+/// Helper para normalizar valores en las funciones multi-plataforma
+double _normalizeMultiValue(num value) {
+  return value <= 1 ? value.toDouble() : value.toDouble() / 100;
+}
+
+/// Helper para obtener el valor apropiado según el dispositivo
+double _getValueForDevice(
+  BuildContext context,
+  Map<DeviceType, num> values,
+  num? fallback,
+) {
+  final deviceType = _getCurrentDeviceType(context);
+  
+  // Intentar obtener valor específico para el dispositivo
+  if (values.containsKey(deviceType)) {
+    return _normalizeMultiValue(values[deviceType]!);
+  }
+  
+  // Fallbacks inteligentes
+  switch (deviceType) {
+    case DeviceType.ios:
+    case DeviceType.android:
+      // Para móviles específicos, intentar valor 'mobile'
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeMultiValue(values[DeviceType.mobile]!);
+      }
+      break;
+    case DeviceType.web:
+      // Para web, intentar valor 'desktop'
+      if (values.containsKey(DeviceType.desktop)) {
+        return _normalizeMultiValue(values[DeviceType.desktop]!);
+      }
+      break;
+    case DeviceType.mobile:
+    case DeviceType.tablet:
+    case DeviceType.desktop:
+      // Estos casos ya se manejan arriba
+      break;
+  }
+  
+  // Si no encuentra valor específico, usar el primer valor disponible o fallback
+  if (values.isNotEmpty) {
+    return _normalizeMultiValue(values.values.first);
+  }
+  
+  if (fallback != null) {
+    return _normalizeMultiValue(fallback);
+  }
+  
+  throw FlutterError('No se encontró valor apropiado para el dispositivo $deviceType');
+}
+
+/// **Ancho Multi-Plataforma:** Obtiene el ancho basado en el tipo de dispositivo.
+/// 
+/// Ejemplo de uso:
+/// ```dart
+/// width: w(context, web: 0.3, mobile: 0.8, tablet: 0.5)
+/// width: w(context, ios: 50, android: 60, web: 30) // Formato porcentaje
+/// ```
+double w(
+  BuildContext context, {
+  num? web,
+  num? ios,
+  num? android,
+  num? mobile,
+  num? tablet,
+  num? desktop,
+  num? fallback,
+}) {
+  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+  if (screenInfo == null) {
+    throw FlutterError.fromParts([
+      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
+      ErrorDescription(
+        'Debes envolver tu aplicación con ScreenSizeInitializer para usar w().'
+      ),
+    ]);
+  }
+  
+  final values = <DeviceType, num>{};
+  if (web != null) values[DeviceType.web] = web;
+  if (ios != null) values[DeviceType.ios] = ios;
+  if (android != null) values[DeviceType.android] = android;
+  if (mobile != null) values[DeviceType.mobile] = mobile;
+  if (tablet != null) values[DeviceType.tablet] = tablet;
+  if (desktop != null) values[DeviceType.desktop] = desktop;
+  
+  final normalizedValue = _getValueForDevice(context, values, fallback);
+  return screenInfo.width * normalizedValue;
+}
+
+/// **Alto Multi-Plataforma:** Obtiene el alto basado en el tipo de dispositivo.
+/// 
+/// Ejemplo de uso:
+/// ```dart
+/// height: h(context, web: 0.2, mobile: 0.4, tablet: 0.3)
+/// height: h(context, ios: 25, android: 30, web: 20) // Formato porcentaje
+/// ```
+double h(
+  BuildContext context, {
+  num? web,
+  num? ios,
+  num? android,
+  num? mobile,
+  num? tablet,
+  num? desktop,
+  num? fallback,
+}) {
+  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+  if (screenInfo == null) {
+    throw FlutterError.fromParts([
+      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
+      ErrorDescription(
+        'Debes envolver tu aplicación con ScreenSizeInitializer para usar h().'
+      ),
+    ]);
+  }
+  
+  final values = <DeviceType, num>{};
+  if (web != null) values[DeviceType.web] = web;
+  if (ios != null) values[DeviceType.ios] = ios;
+  if (android != null) values[DeviceType.android] = android;
+  if (mobile != null) values[DeviceType.mobile] = mobile;
+  if (tablet != null) values[DeviceType.tablet] = tablet;
+  if (desktop != null) values[DeviceType.desktop] = desktop;
+  
+  final normalizedValue = _getValueForDevice(context, values, fallback);
+  return screenInfo.height * normalizedValue;
+}
+
+/// **Tamaño de Fuente Multi-Plataforma:** Obtiene el tamaño de fuente basado en el tipo de dispositivo.
+/// 
+/// Ejemplo de uso:
+/// ```dart
+/// fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03)
+/// fontSize: sp(context, ios: 3, android: 4, web: 2) // Formato tradicional
+/// ```
+double sp(
+  BuildContext context, {
+  num? web,
+  num? ios,
+  num? android,
+  num? mobile,
+  num? tablet,
+  num? desktop,
+  num? fallback,
+}) {
+  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+  if (screenInfo == null) {
+    throw FlutterError.fromParts([
+      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
+      ErrorDescription(
+        'Debes envolver tu aplicación con ScreenSizeInitializer para usar sp().'
+      ),
+    ]);
+  }
+  
+  final values = <DeviceType, num>{};
+  if (web != null) values[DeviceType.web] = web;
+  if (ios != null) values[DeviceType.ios] = ios;
+  if (android != null) values[DeviceType.android] = android;
+  if (mobile != null) values[DeviceType.mobile] = mobile;
+  if (tablet != null) values[DeviceType.tablet] = tablet;
+  if (desktop != null) values[DeviceType.desktop] = desktop;
+  
+  final rawValue = _getValueForDevice(context, values, fallback);
+  
+  // Aplicar la misma lógica de escalado que en la extensión
+  final double baseSize;
+  if (rawValue <= 1) {
+    // Si es decimal (0-1), multiplicamos directamente por el ancho
+    baseSize = screenInfo.width * rawValue;
+  } else {
+    // Si es porcentaje (0-100), usamos la lógica original
+    baseSize = screenInfo.width * (rawValue / 100);
+  }
+  
+  return baseSize * screenInfo.textScale;
 }

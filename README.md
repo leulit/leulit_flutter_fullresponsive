@@ -22,7 +22,7 @@ Agrega la dependencia a tu `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  leulit_flutter_fullresponsive: ^1.1.0
+  leulit_flutter_fullresponsive: ^1.2.0
 ```
 
 Ejecuta:
@@ -156,6 +156,33 @@ Text(
 )
 ```
 
+### 🆕 Funciones Multi-Plataforma
+
+#### `w(BuildContext context, {...})`
+Ancho responsive específico por plataforma:
+```dart
+// Ejemplo con diferentes plataformas
+width: w(context, web: 0.4, mobile: 0.9, tablet: 0.6, fallback: 0.5)
+
+// Solo especificar algunas plataformas
+width: w(context, web: 30, mobile: 80) // Formato porcentaje
+
+// Específico por sistema operativo
+width: w(context, ios: 0.8, android: 0.85, web: 0.4)
+```
+
+#### `h(BuildContext context, {...})`
+Alto responsive específico por plataforma:
+```dart
+height: h(context, web: 0.3, mobile: 0.5, tablet: 0.4, fallback: 0.35)
+```
+
+#### `sp(BuildContext context, {...})`
+Tamaño de fuente responsive específico por plataforma:
+```dart
+fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025)
+```
+
 ### Widgets
 
 #### `ScreenSizeInitializer`
@@ -202,6 +229,58 @@ class FormatComparison extends StatelessWidget {
   }
 }
 ```
+
+### 🚀 **NUEVO: Funciones Multi-Plataforma**
+
+**Ahora puedes especificar valores diferentes para cada plataforma:**
+
+```dart
+class MultiPlatformExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      // Diferentes anchos según la plataforma
+      width: w(context, 
+        web: 0.3,      // 30% en web
+        mobile: 0.9,   // 90% en móviles (iOS y Android)
+        tablet: 0.6,   // 60% en tablets
+        fallback: 0.5, // 50% como fallback
+      ),
+      
+      // Diferentes alturas según la plataforma
+      height: h(context,
+        web: 0.4,       // 40% en web
+        ios: 0.25,      // 25% específico para iOS
+        android: 0.3,   // 30% específico para Android
+        tablet: 0.35,   // 35% en tablets
+        fallback: 0.28, // 28% como fallback
+      ),
+      
+      child: Text(
+        'Responsive Multi-Platform',
+        style: TextStyle(
+          // Diferentes tamaños de fuente según la plataforma
+          fontSize: sp(context,
+            web: 0.02,    // Tamaño para web
+            mobile: 0.04, // Tamaño para móviles
+            tablet: 0.03, // Tamaño para tablets
+            fallback: 0.025,
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+#### Plataformas soportadas:
+- **`web`**: Aplicaciones web y desktop
+- **`ios`**: Específico para iOS
+- **`android`**: Específico para Android  
+- **`mobile`**: Ambos iOS y Android
+- **`tablet`**: Tablets (detectado por tamaño de pantalla ≥600px)
+- **`desktop`**: Aplicaciones de escritorio
+- **`fallback`**: Valor por defecto si no se encuentra una plataforma específica
 
 ### Layout responsive completo
 

@@ -1,3 +1,17 @@
+## [1.2.0] - 2024-10-14
+
+### Added
+- **🎯 Funciones Multi-Plataforma**: Nuevas funciones globales `w()`, `h()`, y `sp()` que permiten especificar valores diferentes para cada plataforma
+- **📱 Detección automática de plataforma**: Sistema inteligente que detecta web, iOS, Android, mobile, tablet, y desktop
+- **🔄 Fallbacks inteligentes**: Sistema de fallback que usa `mobile` para iOS/Android, `desktop` para web, etc.
+- **⚙️ Flexibilidad total**: Combina valores específicos por plataforma con fallbacks
+- Ejemplos de uso multi-plataforma en la documentación
+- Tests completos para todas las nuevas funcionalidades
+
+### Enhanced
+- Documentación expandida con ejemplos multi-plataforma
+- Mejor organización de la API Reference
+
 ## [1.1.0] - 2024-10-14
 
 ### Added
