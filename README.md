@@ -22,7 +22,7 @@ Agrega la dependencia a tu `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  leulit_flutter_fullresponsive: ^1.0.0
+  leulit_flutter_fullresponsive: ^1.1.0
 ```
 
 Ejecuta:
@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
 
 ### 2. Usando las extensiones
 
-Una vez configurado, puedes usar las extensiones en cualquier parte de tu aplicación:
+Una vez configurado, puedes usar las extensiones en cualquier parte de tu aplicación. **Ahora soporta dos formatos:**
 
 ```dart
 class HomeScreen extends StatelessWidget {
@@ -90,12 +90,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Formato tradicional (0-100)
         width: 80.w(context),        // 80% del ancho de pantalla
         height: 50.h(context),       // 50% del alto de pantalla
+        
+        // O formato decimal (0-1) para mayor precisión
+        // width: 0.8.w(context),       // Equivalente a 80%
+        // height: 0.5.h(context),      // Equivalente a 50%
+        
+        // Valores ultra precisos
+        // width: 0.076543.w(context),  // 7.6543% exacto
+        
         child: Text(
           'Texto responsive',
           style: TextStyle(
             fontSize: 4.sp(context),  // Tamaño de fuente responsive
+            // o fontSize: 0.03.sp(context), // Formato decimal
           ),
         ),
       ),
@@ -109,23 +119,40 @@ class HomeScreen extends StatelessWidget {
 ### Extension Methods
 
 #### `.w(BuildContext context)`
-Calcula un porcentaje del ancho de pantalla.
+Calcula un porcentaje del ancho de pantalla. Acepta dos formatos:
 ```dart
-Container(width: 50.w(context)) // 50% del ancho
+// Formato tradicional (0-100)
+Container(width: 50.w(context))     // 50% del ancho
+
+// Formato decimal (0-1) para mayor precisión
+Container(width: 0.5.w(context))    // 50% del ancho
+Container(width: 0.076543.w(context)) // 7.6543% exacto
 ```
 
 #### `.h(BuildContext context)`
-Calcula un porcentaje del alto de pantalla.
+Calcula un porcentaje del alto de pantalla. Acepta dos formatos:
 ```dart
-Container(height: 30.h(context)) // 30% del alto
+// Formato tradicional (0-100)
+Container(height: 30.h(context))    // 30% del alto
+
+// Formato decimal (0-1) para mayor precisión
+Container(height: 0.3.h(context))   // 30% del alto
+Container(height: 0.123456.h(context)) // 12.3456% exacto
 ```
 
 #### `.sp(BuildContext context)`
-Calcula un tamaño de fuente responsive que respeta la configuración de accesibilidad.
+Calcula un tamaño de fuente responsive que respeta la configuración de accesibilidad. Acepta dos formatos:
 ```dart
+// Formato tradicional
 Text(
   'Hola',
   style: TextStyle(fontSize: 3.sp(context)), // Fuente responsive
+)
+
+// Formato decimal para mayor control
+Text(
+  'Hola',
+  style: TextStyle(fontSize: 0.025.sp(context)), // Control preciso
 )
 ```
 
@@ -141,6 +168,40 @@ ScreenSizeInitializer(
 ```
 
 ## 💡 Ejemplos Avanzados
+
+### Comparación de formatos
+
+```dart
+class FormatComparison extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Formato tradicional (0-100)
+        Container(
+          width: 75.w(context),        // 75%
+          height: 10.h(context),       // 10%
+          color: Colors.blue,
+        ),
+        
+        // Formato decimal (0-1) - Equivalente
+        Container(
+          width: 0.75.w(context),      // 75%
+          height: 0.1.h(context),      // 10%
+          color: Colors.green,
+        ),
+        
+        // Alta precisión solo posible con decimales
+        Container(
+          width: 0.618033.w(context),  // Proporción áurea exacta
+          height: 0.08333.h(context),  // 1/12 exacto
+          color: Colors.orange,
+        ),
+      ],
+    );
+  }
+}
+```
 
 ### Layout responsive completo
 

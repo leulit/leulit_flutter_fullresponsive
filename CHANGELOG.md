@@ -1,3 +1,16 @@
+## [1.1.0] - 2024-10-14
+
+### Added
+- **🎯 Doble formato de valores**: Ahora soporta tanto valores tradicionales (0-100) como decimales (0-1)
+- **📏 Ultra precisión**: Posibilidad de usar valores como `0.076543.w(context)` para dimensiones exactas
+- **🔄 Detección automática**: El sistema detecta automáticamente si usas formato porcentaje o decimal
+- Nuevos tests unitarios para validar ambos formatos
+- Documentación actualizada con ejemplos de ambos formatos
+
+### Enhanced
+- Extension methods `.w()`, `.h()`, y `.sp()` ahora aceptan valores decimales para mayor precisión
+- Mejor documentación con ejemplos de uso avanzado
+
 ## [1.0.0] - 2024-10-14
 
 ### Added
