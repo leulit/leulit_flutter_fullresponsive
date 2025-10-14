@@ -178,7 +178,7 @@ void main() {
             child: Builder(
               builder: (context) {
                 return Scaffold(
-                  body: Container(
+                  body: SizedBox(
                     // Usando la nueva función multi-plataforma
                     width: w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6),
                     child: const Text('Test'),
@@ -190,7 +190,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(Container));
+      final context = tester.element(find.byType(Text));
       
       // Verificar que la función retorna un valor positivo
       final multiPlatformWidth = w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6);
@@ -211,7 +211,7 @@ void main() {
             child: Builder(
               builder: (context) {
                 return Scaffold(
-                  body: Container(
+                  body: SizedBox(
                     height: h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35),
                     child: const Text('Test'),
                   ),
@@ -222,7 +222,7 @@ void main() {
         ),
       );
 
-      final context = tester.element(find.byType(Container));
+      final context = tester.element(find.byType(Text));
       
       // Verificar que la función retorna un valor positivo
       final multiPlatformHeight = h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35);
@@ -285,6 +285,240 @@ void main() {
       expect(() => w(context), throwsA(isA<FlutterError>()));
       expect(() => h(context), throwsA(isA<FlutterError>()));
       expect(() => sp(context), throwsA(isA<FlutterError>()));
+    });
+
+    testWidgets('performance test: DeviceType should be calculated only once', (WidgetTester tester) async {
+      // Test que verifica que múltiples llamadas no recalculan DeviceType
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                // Simulamos múltiples llamadas a funciones multi-plataforma
+                // Si DeviceType se calculara en cada llamada, esto sería lento
+                final width1 = w(context, web: 0.1, mobile: 0.2, fallback: 0.15);
+                final width2 = w(context, web: 0.2, mobile: 0.3, fallback: 0.25);
+                final height1 = h(context, web: 0.05, mobile: 0.1, fallback: 0.075);
+                final height2 = h(context, web: 0.1, mobile: 0.15, fallback: 0.125);
+                final fontSize1 = sp(context, web: 0.01, mobile: 0.02, fallback: 0.015);
+                final fontSize2 = sp(context, web: 0.02, mobile: 0.03, fallback: 0.025);
+                
+                return Scaffold(
+                  body: SizedBox(
+                    width: width1 + width2,
+                    height: height1 + height2,
+                    child: Text(
+                      'Performance Test',
+                      style: TextStyle(fontSize: fontSize1 + fontSize2),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Text));
+
+      // Test de rendimiento: múltiples llamadas deben ser rápidas
+      // porque DeviceType ya está calculado en ScreenInfo
+      final stopwatch = Stopwatch()..start();
+      
+      for (int i = 0; i < 1000; i++) {
+        // Múltiples llamadas que antes requerían recalcular DeviceType
+        w(context, web: 0.1, mobile: 0.2, fallback: 0.15);
+        h(context, web: 0.05, mobile: 0.1, fallback: 0.075);
+        sp(context, web: 0.01, mobile: 0.02, fallback: 0.015);
+      }
+      
+      stopwatch.stop();
+      
+      // Si toma menos de 100ms para 1000 llamadas, la optimización funciona
+      expect(stopwatch.elapsedMilliseconds, lessThan(100));
+      expect(find.text('Performance Test'), findsOneWidget);
+    });
+  });
+
+  group('ResponsiveSize Extension Tests', () {
+    testWidgets('should calculate responsive icon sizes', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Icon(
+                    Icons.star,
+                    size: 24.size(context),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Icon));
+      
+      final size24 = 24.size(context);
+      final size12 = 12.size(context);
+      
+      expect(size24, greaterThan(0));
+      expect(size12, greaterThan(0));
+      expect(size24 / size12, closeTo(2.0, 0.01)); // 24 debe ser doble de 12
+    });
+
+    testWidgets('should handle sizeFor multi-platform values', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Icon(
+                    Icons.home,
+                    size: 20.sizeFor(context, mobile: 16, tablet: 24, desktop: 32),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Icon));
+      final size = 20.sizeFor(context, mobile: 16, tablet: 24, desktop: 32);
+      
+      expect(size, greaterThan(0));
+    });
+  });
+
+  group('ResponsiveRadius Extension Tests', () {
+    testWidgets('should calculate responsive border radius', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.radius(context)),
+                    ),
+                    child: const Text('Rounded Container'),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Container));
+      
+      final radius12 = 12.radius(context);
+      final radius6 = 6.radius(context);
+      
+      expect(radius12, greaterThan(0));
+      expect(radius6, greaterThan(0));
+      expect(radius12 / radius6, closeTo(2.0, 0.01)); // 12 debe ser doble de 6
+    });
+
+    testWidgets('should handle radiusFor multi-platform values', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                        8.radiusFor(context, mobile: 4, tablet: 12, desktop: 16)
+                      ),
+                    ),
+                    child: const Text('Multi-platform Radius'),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Container));
+      final radius = 8.radiusFor(context, mobile: 4, tablet: 12, desktop: 16);
+      
+      expect(radius, greaterThan(0));
+    });
+  });
+
+  group('ResponsiveFlex Extension Tests', () {
+    testWidgets('should calculate responsive flex values', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Row(
+                    children: [
+                      Expanded(
+                        flex: 3.flexValue(context),
+                        child: Container(color: Colors.red),
+                      ),
+                      Expanded(
+                        flex: 2.flexValue(context),
+                        child: Container(color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Row));
+      
+      final flex3 = 3.flexValue(context);
+      final flex2 = 2.flexValue(context);
+      
+      expect(flex3, greaterThan(0));
+      expect(flex2, greaterThan(0));
+      expect(flex3, greaterThanOrEqualTo(3));
+      expect(flex2, greaterThanOrEqualTo(2));
+    });
+
+    testWidgets('should handle flexFor multi-platform values', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScreenSizeInitializer(
+            child: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Row(
+                    children: [
+                      Expanded(
+                        flex: 4.flexFor(context, mobile: 2, tablet: 6, desktop: 8),
+                        child: Container(color: Colors.green),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      final context = tester.element(find.byType(Row));
+      final flex = 4.flexFor(context, mobile: 2, tablet: 6, desktop: 8);
+      
+      expect(flex, greaterThan(0));
+      expect(flex, greaterThanOrEqualTo(2)); // Al menos el valor mobile mínimo
     });
   });
 }

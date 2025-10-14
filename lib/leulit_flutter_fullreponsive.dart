@@ -3,6 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'core/screen_scaler_inherited_widget.dart';
 import 'domain/screen_info.dart';
 
+// Re-export DeviceType para conveniencia del usuario
+export 'domain/screen_info.dart' show DeviceType;
+
 // -----------------------------------------------------------------------------
 // 1. Widget de Inicialización (Punto de Entrada)
 // -----------------------------------------------------------------------------
@@ -20,11 +23,16 @@ class ScreenSizeInitializer extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     
     final double newTextScale = mediaQuery.textScaler.scale(1);
+    
+    // ⚡ OPTIMIZACIÓN: Calcular DeviceType UNA SOLA VEZ aquí
+    final deviceType = _calculateDeviceType(mediaQuery.size.width);
+    
     // Creación del objeto inmutable.
     final screenInfo = ScreenInfo(
       width: mediaQuery.size.width,
       height: mediaQuery.size.height,
       textScale: newTextScale,
+      deviceType: deviceType,
     );
 
     // Devolver el propagador con la información.
@@ -32,6 +40,28 @@ class ScreenSizeInitializer extends StatelessWidget {
       info: screenInfo,
       child: child,
     );
+  }
+
+  /// ⚡ OPTIMIZACIÓN: Función estática para calcular DeviceType una sola vez
+  /// No depende del context, solo de platform y screen width
+  static DeviceType _calculateDeviceType(double screenWidth) {
+    final platform = defaultTargetPlatform;
+    
+    // Determinar si es tablet basándose en el tamaño de pantalla
+    final isTablet = screenWidth >= 600;
+    
+    switch (platform) {
+      case TargetPlatform.iOS:
+        return isTablet ? DeviceType.tablet : DeviceType.ios;
+      case TargetPlatform.android:
+        return isTablet ? DeviceType.tablet : DeviceType.android;
+      case TargetPlatform.fuchsia:
+        return isTablet ? DeviceType.tablet : DeviceType.android;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return DeviceType.web;
+    }
   }
 }
 
@@ -108,53 +138,217 @@ extension ScreenScale on num {
 }
 
 // -----------------------------------------------------------------------------
-// 3. Funciones Multi-Plataforma para Valores Específicos por Dispositivo
+// 2.1. Extensiones Especializadas para Casos de Uso Específicos
 // -----------------------------------------------------------------------------
 
-/// Enumeration para tipos de dispositivos
-enum DeviceType {
-  web,
-  ios,
-  android,
-  mobile, // Incluye tanto iOS como Android
-  tablet,
-  desktop // Incluye web y desktop apps
-}
-
-/// Helper para detectar el tipo de dispositivo actual
-DeviceType _getCurrentDeviceType(BuildContext context) {
-  final platform = defaultTargetPlatform;
-  final screenInfo = ScreenScalerInheritedWidget.of(context)!.info;
+/// Extensión para hacer responsive valores de tamaño de iconos, padding, margins, etc.
+/// Optimizada para valores numéricos pequeños como sizes de iconos (16, 24, 32, etc.)
+extension ResponsiveSize on num {
   
-  // Determinar si es tablet basándose en el tamaño de pantalla
-  final isTablet = screenInfo.width >= 600;
+  /// **Tamaño Responsive para Iconos, Padding, Margins:**
+  /// Calcula un tamaño responsive basado en el ancho de pantalla.
+  /// Optimizado para valores pequeños como icon sizes.
+  /// 
+  /// Ejemplos:
+  /// - 24.size(context) // Tamaño de icono responsive
+  /// - 16.size(context) // Padding responsive
+  /// - 8.size(context)  // Margin responsive
+  double size(BuildContext context) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveSize requiere ScreenSizeInitializer');
+    }
+    
+    // Base calculation: usa un factor más conservador para elementos UI pequeños
+    // Factor base: 2.5% del ancho de pantalla por cada unidad
+    return screenInfo.width * (this * 0.025 / 100);
+  }
   
-  switch (platform) {
-    case TargetPlatform.iOS:
-      return isTablet ? DeviceType.tablet : DeviceType.ios;
-    case TargetPlatform.android:
-      return isTablet ? DeviceType.tablet : DeviceType.android;
-    case TargetPlatform.fuchsia:
-      return isTablet ? DeviceType.tablet : DeviceType.android;
-    case TargetPlatform.linux:
-    case TargetPlatform.macOS:
-    case TargetPlatform.windows:
-      return DeviceType.web;
+  /// **Tamaño Responsive Multi-Plataforma para Iconos/UI:**
+  /// Permite diferentes tamaños según la plataforma
+  /// 
+  /// Ejemplo:
+  /// ```dart
+  /// Icon(
+  ///   Icons.star,
+  ///   size: 24.sizeFor(context, mobile: 20, tablet: 28, desktop: 32),
+  /// )
+  /// ```
+  double sizeFor(
+    BuildContext context, {
+    num? web,
+    num? ios,
+    num? android,
+    num? mobile,
+    num? tablet, 
+    num? desktop,
+    num? fallback,
+  }) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveSize requiere ScreenSizeInitializer');
+    }
+    
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final normalizedValue = _getValueForDevice(screenInfo, values, fallback ?? this);
+    return screenInfo.width * (normalizedValue * 0.025);
   }
 }
+
+/// Extensión para hacer responsive valores de border radius
+extension ResponsiveRadius on num {
+  
+  /// **Border Radius Responsive:**
+  /// Calcula un border radius responsive basado en el tamaño de pantalla.
+  /// 
+  /// Ejemplos:
+  /// - BorderRadius.circular(12.radius(context))
+  /// - BorderRadius.circular(8.radius(context)) 
+  double radius(BuildContext context) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveRadius requiere ScreenSizeInitializer');
+    }
+    
+    // Factor base: 1.5% del ancho de pantalla por cada unidad de radius
+    return screenInfo.width * (this * 0.015 / 100);
+  }
+  
+  /// **Border Radius Responsive Multi-Plataforma:**
+  /// Permite diferentes radius según la plataforma
+  /// 
+  /// Ejemplo:
+  /// ```dart
+  /// Container(
+  ///   decoration: BoxDecoration(
+  ///     borderRadius: BorderRadius.circular(
+  ///       12.radiusFor(context, mobile: 8, tablet: 16, desktop: 20)
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  double radiusFor(
+    BuildContext context, {
+    num? web,
+    num? ios,
+    num? android,
+    num? mobile,
+    num? tablet,
+    num? desktop,
+    num? fallback,
+  }) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveRadius requiere ScreenSizeInitializer');
+    }
+    
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final normalizedValue = _getValueForDevice(screenInfo, values, fallback ?? this);
+    return screenInfo.width * (normalizedValue * 0.015);
+  }
+}
+
+/// Extensión para hacer responsive valores de flex en layouts
+extension ResponsiveFlex on int {
+  
+  /// **Flex Value Responsive:**
+  /// Ajusta valores de flex basándose en el tipo de dispositivo para mejores layouts.
+  /// 
+  /// Ejemplos:
+  /// - Expanded(flex: 3.flexValue(context), child: widget)
+  /// - Flexible(flex: 2.flexValue(context), child: widget)
+  int flexValue(BuildContext context) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveFlex requiere ScreenSizeInitializer');
+    }
+    
+    // Ajuste de flex basado en el tipo de dispositivo
+    switch (screenInfo.deviceType) {
+      case DeviceType.mobile:
+        return this; // Mantener valor original en mobile
+      case DeviceType.tablet:
+        return (this * 1.2).round(); // Incrementar ligeramente en tablet
+      case DeviceType.desktop:
+        return (this * 1.5).round(); // Incrementar más en desktop
+      default:
+        return this;
+    }
+  }
+  
+  /// **Flex Value Multi-Plataforma:**
+  /// Permite diferentes valores de flex según la plataforma
+  /// 
+  /// Ejemplo:
+  /// ```dart
+  /// Expanded(
+  ///   flex: 3.flexFor(context, mobile: 2, tablet: 4, desktop: 5),
+  ///   child: widget,
+  /// )
+  /// ```
+  int flexFor(
+    BuildContext context, {
+    int? web,
+    int? ios,
+    int? android,
+    int? mobile,
+    int? tablet,
+    int? desktop,
+    int? fallback,
+  }) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      throw FlutterError('ResponsiveFlex requiere ScreenSizeInitializer');
+    }
+    
+    switch (screenInfo.deviceType) {
+      case DeviceType.web:
+        return web ?? fallback ?? this;
+      case DeviceType.ios:
+        return ios ?? mobile ?? fallback ?? this;
+      case DeviceType.android:
+        return android ?? mobile ?? fallback ?? this;
+      case DeviceType.mobile:
+        return mobile ?? fallback ?? this;
+      case DeviceType.tablet:
+        return tablet ?? fallback ?? this;
+      case DeviceType.desktop:
+        return desktop ?? fallback ?? this;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 3. Funciones Multi-Plataforma para Valores Específicos por Dispositivo
+// -----------------------------------------------------------------------------
 
 /// Helper para normalizar valores en las funciones multi-plataforma
 double _normalizeMultiValue(num value) {
   return value <= 1 ? value.toDouble() : value.toDouble() / 100;
 }
 
-/// Helper para obtener el valor apropiado según el dispositivo
+/// ⚡ OPTIMIZACIÓN: Helper para obtener el valor apropiado según el dispositivo
+/// Usa el DeviceType ya calculado en ScreenInfo (cero overhead adicional)
 double _getValueForDevice(
-  BuildContext context,
+  ScreenInfo screenInfo,
   Map<DeviceType, num> values,
   num? fallback,
 ) {
-  final deviceType = _getCurrentDeviceType(context);
+  final deviceType = screenInfo.deviceType; // ⚡ Ya calculado, acceso O(1)
   
   // Intentar obtener valor específico para el dispositivo
   if (values.containsKey(deviceType)) {
@@ -230,7 +424,7 @@ double w(
   if (tablet != null) values[DeviceType.tablet] = tablet;
   if (desktop != null) values[DeviceType.desktop] = desktop;
   
-  final normalizedValue = _getValueForDevice(context, values, fallback);
+  final normalizedValue = _getValueForDevice(screenInfo, values, fallback);
   return screenInfo.width * normalizedValue;
 }
 
@@ -269,7 +463,7 @@ double h(
   if (tablet != null) values[DeviceType.tablet] = tablet;
   if (desktop != null) values[DeviceType.desktop] = desktop;
   
-  final normalizedValue = _getValueForDevice(context, values, fallback);
+  final normalizedValue = _getValueForDevice(screenInfo, values, fallback);
   return screenInfo.height * normalizedValue;
 }
 
@@ -308,7 +502,7 @@ double sp(
   if (tablet != null) values[DeviceType.tablet] = tablet;
   if (desktop != null) values[DeviceType.desktop] = desktop;
   
-  final rawValue = _getValueForDevice(context, values, fallback);
+  final rawValue = _getValueForDevice(screenInfo, values, fallback);
   
   // Aplicar la misma lógica de escalado que en la extensión
   final double baseSize;

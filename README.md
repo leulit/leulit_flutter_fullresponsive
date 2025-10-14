@@ -350,6 +350,308 @@ class ResponsiveLayout extends StatelessWidget {
 }
 ```
 
+## 🎨 **NUEVO: Extensiones Especializadas**
+
+### 📏 ResponsiveSize - Para Iconos, Padding, Margins
+
+Ahora puedes hacer responsive fácilmente los tamaños de iconos, padding, margins y otros elementos UI pequeños:
+
+```dart
+class IconExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Iconos responsive
+        Icon(
+          Icons.star,
+          size: 24.size(context), // Tamaño responsive automático
+          color: Colors.gold,
+        ),
+        
+        // Con valores específicos por plataforma
+        Icon(
+          Icons.favorite,
+          size: 20.sizeFor(context,
+            mobile: 18,   // Más pequeño en móviles
+            tablet: 24,   // Medio en tablets
+            desktop: 32,  // Más grande en desktop
+          ),
+          color: Colors.red,
+        ),
+        
+        // Padding responsive
+        Padding(
+          padding: EdgeInsets.all(16.size(context)),
+          child: Text('Padding responsive'),
+        ),
+        
+        // Margins responsive
+        Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: 20.size(context),
+            vertical: 12.size(context),
+          ),
+          child: Text('Margin responsive'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+### 🔄 ResponsiveRadius - Para Border Radius
+
+Crea esquinas redondeadas que se adapten perfectamente a diferentes pantallas:
+
+```dart
+class RadiusExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Border radius simple
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(12.radius(context)),
+          ),
+          child: Text('Esquinas responsive'),
+        ),
+        
+        // Border radius específico por plataforma
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.green,
+            borderRadius: BorderRadius.circular(
+              8.radiusFor(context,
+                mobile: 6,    // Esquinas más suaves en móvil
+                tablet: 12,   // Intermedias en tablet
+                desktop: 20,  // Más pronunciadas en desktop
+              ),
+            ),
+          ),
+          child: Text('Multi-platform radius'),
+        ),
+        
+        // Diferentes esquinas
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.purple,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.radius(context)),
+              topRight: Radius.circular(8.radius(context)),
+              bottomLeft: Radius.circular(4.radius(context)),
+              bottomRight: Radius.circular(20.radius(context)),
+            ),
+          ),
+          child: Text('Esquinas asimétricas'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+### 📐 ResponsiveFlex - Para Layouts Flexibles
+
+Optimiza tus layouts con valores de flex que se adapten al tipo de dispositivo:
+
+```dart
+class FlexExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Row con flex responsive automático
+        Row(
+          children: [
+            Expanded(
+              flex: 3.flexValue(context), // Se ajusta automáticamente
+              child: Container(
+                color: Colors.red,
+                height: 100,
+                child: Center(child: Text('Flex 3')),
+              ),
+            ),
+            Expanded(
+              flex: 2.flexValue(context), // Se ajusta automáticamente  
+              child: Container(
+                color: Colors.blue,
+                height: 100,
+                child: Center(child: Text('Flex 2')),
+              ),
+            ),
+          ],
+        ),
+        
+        SizedBox(height: 20),
+        
+        // Row con flex específico por plataforma
+        Row(
+          children: [
+            Expanded(
+              flex: 4.flexFor(context,
+                mobile: 3,    // Más equilibrado en móvil
+                tablet: 5,    // Más prominente en tablet
+                desktop: 6,   // Dominante en desktop
+              ),
+              child: Container(
+                color: Colors.green,
+                height: 100,
+                child: Center(child: Text('Flex Adaptativo')),
+              ),
+            ),
+            Expanded(
+              flex: 2.flexFor(context,
+                mobile: 2,
+                tablet: 2,
+                desktop: 1,   // Menos espacio en desktop
+              ),
+              child: Container(
+                color: Colors.orange,
+                height: 100,
+                child: Center(child: Text('Flex Secundario')),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+```
+
+### 🎯 Casos de Uso Prácticos
+
+```dart
+class PracticalExamples extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: Icon(
+          Icons.menu,
+          size: 24.sizeFor(context, mobile: 20, tablet: 28),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.search,
+              size: 22.size(context),
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.more_vert,
+              size: 22.size(context),
+            ),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.size(context)),
+        child: Column(
+          children: [
+            // Card con esquinas y padding responsive
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.radius(context)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(20.size(context)),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.notifications,
+                      size: 28.sizeFor(context,
+                        mobile: 24,
+                        tablet: 32,
+                        desktop: 36,
+                      ),
+                      color: Colors.blue,
+                    ),
+                    SizedBox(width: 16.size(context)),
+                    Expanded(
+                      flex: 4.flexValue(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Notificación',
+                            style: TextStyle(
+                              fontSize: 3.sp(context),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Descripción de la notificación',
+                            style: TextStyle(fontSize: 2.5.sp(context)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            SizedBox(height: 20.size(context)),
+            
+            // Botones con diferentes estilos responsive
+            Row(
+              children: [
+                Expanded(
+                  flex: 2.flexFor(context, mobile: 1, tablet: 2),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.radius(context)),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12.size(context),
+                        horizontal: 24.size(context),
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: Text(
+                      'Aceptar',
+                      style: TextStyle(fontSize: 2.8.sp(context)),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.size(context)),
+                Expanded(
+                  flex: 1.flexValue(context),
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.radius(context)),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 12.size(context),
+                        horizontal: 16.size(context),
+                      ),
+                    ),
+                    onPressed: () {},
+                    child: Text(
+                      'Cancelar',
+                      style: TextStyle(fontSize: 2.8.sp(context)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
 ## 🧪 Testing
 
 Para ejecutar las pruebas:
