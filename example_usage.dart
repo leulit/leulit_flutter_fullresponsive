@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullresponsive.dart';
+import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullreponsive.dart';
+
 
 /// Ejemplo completo mostrando todas las nuevas funcionalidades:
 /// - ResponsiveSize para iconos, padding, margins

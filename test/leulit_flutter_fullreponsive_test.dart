@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullreponsive.dart';
+import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullresponsive.dart';
 
 void main() {
   group('ScreenScale Extension Tests', () {
@@ -521,4 +521,5 @@ void main() {
       expect(flex, greaterThanOrEqualTo(2)); // Al menos el valor mobile mínimo
     });
   });
+
 }
