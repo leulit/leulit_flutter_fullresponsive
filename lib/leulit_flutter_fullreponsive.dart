@@ -7,6 +7,53 @@ import 'domain/screen_info.dart';
 export 'domain/screen_info.dart' show DeviceType;
 
 // -----------------------------------------------------------------------------
+// DEBUG HELPERS
+// -----------------------------------------------------------------------------
+
+/// Helper de debug para verificar qué está detectando la librería
+class ResponsiveDebug {
+  /// Obtiene información de debug sobre el dispositivo actual
+  static Map<String, dynamic> getDeviceInfo(BuildContext context) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) {
+      return {'error': 'ScreenSizeInitializer no encontrado'};
+    }
+    
+    return {
+      'deviceType': screenInfo.deviceType.toString(),
+      'width': screenInfo.width,
+      'height': screenInfo.height,
+      'textScale': screenInfo.textScale,
+      'platform': defaultTargetPlatform.toString(),
+    };
+  }
+  
+  /// Calcula qué valor se usaría para una configuración específica
+  static double debugSizeValue(BuildContext context, num baseValue, {
+    num? web,
+    num? ios,
+    num? android, 
+    num? mobile,
+    num? tablet,
+    num? desktop,
+  }) {
+    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
+    if (screenInfo == null) return -1;
+    
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final directValue = _getDirectValueForDevice(screenInfo, values, baseValue);
+    return screenInfo.width * (directValue * 0.1 / 100);
+  }
+}
+
+// -----------------------------------------------------------------------------
 // 1. Widget de Inicialización (Punto de Entrada)
 // -----------------------------------------------------------------------------
 
@@ -287,9 +334,9 @@ extension ResponsiveSize on num {
     // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
     if (web == null && ios == null && android == null && 
         mobile == null && tablet == null && desktop == null) {
-      // Base calculation: usa un factor más conservador para elementos UI pequeños
-      // Factor base: 2.5% del ancho de pantalla por cada unidad
-      return screenInfo.width * (this * 0.025 / 100);
+      // Base calculation: factor ajustado para que valores típicos (16, 24, 32) sean visibles
+      // Factor base: 0.1% del ancho de pantalla por cada unidad (mucho más visible)
+      return screenInfo.width * (this * 0.1 / 100);
     }
     
     // Usar lógica multi-plataforma con 'this' como fallback
@@ -301,8 +348,8 @@ extension ResponsiveSize on num {
     if (tablet != null) values[DeviceType.tablet] = tablet;
     if (desktop != null) values[DeviceType.desktop] = desktop;
     
-    final normalizedValue = _getValueForDevice(screenInfo, values, this);
-    return screenInfo.width * (normalizedValue * 0.025 / 100);
+    final directValue = _getDirectValueForDevice(screenInfo, values, this);
+    return screenInfo.width * (directValue * 0.1 / 100);
   }
 }
 
@@ -421,9 +468,14 @@ extension ResponsiveFlex on int {
 // 3. Helpers para Funcionalidad Multi-Plataforma
 // -----------------------------------------------------------------------------
 
-/// Helper para normalizar valores en las funciones multi-plataforma
+/// Helper para normalizar valores en las funciones multi-plataforma (w, h, sp)
 double _normalizeMultiValue(num value) {
   return value <= 1 ? value.toDouble() : value.toDouble() / 100;
+}
+
+/// Helper específico para size() - NO normaliza, usa valores directos
+double _normalizeDirectValue(num value) {
+  return value.toDouble(); // Sin normalización - valores directos
 }
 
 /// ⚡ OPTIMIZACIÓN: Helper para obtener el valor apropiado según el dispositivo
@@ -435,37 +487,92 @@ double _getValueForDevice(
 ) {
   final deviceType = screenInfo.deviceType; // ⚡ Ya calculado, acceso O(1)
   
-  // Intentar obtener valor específico para el dispositivo
+  // PRIORIDAD 1: Intentar obtener valor específico para el deviceType exacto
   if (values.containsKey(deviceType)) {
     return _normalizeMultiValue(values[deviceType]!);
   }
   
-  // Fallbacks inteligentes
+  // PRIORIDAD 2: Fallbacks inteligentes basados en jerarquía de tipos
   switch (deviceType) {
     case DeviceType.ios:
+      // iOS: prioridad ios > mobile > fallback
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeMultiValue(values[DeviceType.mobile]!);
+      }
+      break;
     case DeviceType.android:
-      // Para móviles específicos, intentar valor 'mobile'
+      // Android: prioridad android > mobile > fallback
       if (values.containsKey(DeviceType.mobile)) {
         return _normalizeMultiValue(values[DeviceType.mobile]!);
       }
       break;
     case DeviceType.web:
-      // Para web, intentar valor 'desktop'
+      // Web: prioridad web > desktop > fallback
       if (values.containsKey(DeviceType.desktop)) {
         return _normalizeMultiValue(values[DeviceType.desktop]!);
       }
       break;
-    case DeviceType.mobile:
     case DeviceType.tablet:
+      // Tablet: prioridad tablet > mobile > fallback
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeMultiValue(values[DeviceType.mobile]!);
+      }
+      break;
+    case DeviceType.mobile:
     case DeviceType.desktop:
-      // Estos casos ya se manejan arriba
+      // Estos casos ya se manejan en PRIORIDAD 1
       break;
   }
   
-  // Si no encuentra valor específico, usar el primer valor disponible o fallback
-  if (values.isNotEmpty) {
-    return _normalizeMultiValue(values.values.first);
+  // PRIORIDAD 3: Si no se encuentra valor específico, usar fallback directamente
+  return _normalizeMultiValue(fallback);
+}
+
+/// Helper especializado para size() - valores directos sin normalización
+double _getDirectValueForDevice(
+  ScreenInfo screenInfo,
+  Map<DeviceType, num> values,
+  num fallback,
+) {
+  final deviceType = screenInfo.deviceType; // ⚡ Ya calculado, acceso O(1)
+  
+  // PRIORIDAD 1: Intentar obtener valor específico para el deviceType exacto
+  if (values.containsKey(deviceType)) {
+    return _normalizeDirectValue(values[deviceType]!);
   }
   
-  return _normalizeMultiValue(fallback);
+  // PRIORIDAD 2: Fallbacks inteligentes basados en jerarquía de tipos
+  switch (deviceType) {
+    case DeviceType.ios:
+      // iOS: prioridad ios > mobile > fallback
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeDirectValue(values[DeviceType.mobile]!);
+      }
+      break;
+    case DeviceType.android:
+      // Android: prioridad android > mobile > fallback
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeDirectValue(values[DeviceType.mobile]!);
+      }
+      break;
+    case DeviceType.web:
+      // Web: prioridad web > desktop > fallback
+      if (values.containsKey(DeviceType.desktop)) {
+        return _normalizeDirectValue(values[DeviceType.desktop]!);
+      }
+      break;
+    case DeviceType.tablet:
+      // Tablet: prioridad tablet > mobile > fallback
+      if (values.containsKey(DeviceType.mobile)) {
+        return _normalizeDirectValue(values[DeviceType.mobile]!);
+      }
+      break;
+    case DeviceType.mobile:
+    case DeviceType.desktop:
+      // Estos casos ya se manejan en PRIORIDAD 1
+      break;
+  }
+  
+  // PRIORIDAD 3: Si no se encuentra valor específico, usar fallback directamente
+  return _normalizeDirectValue(fallback);
 }

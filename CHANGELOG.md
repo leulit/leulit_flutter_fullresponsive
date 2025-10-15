@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.1] - 2024-12-19
+### Fixed
+- **CRITICAL FIX**: Factor de conversión en `.size()` corregido de 0.025% a 0.1%
+- **Improved Multi-Platform Detection**: Lógica de fallback mejorada para iOS/Android
+- **Added Debug Helpers**: `ResponsiveDebug` class para debugging de valores responsive
+
+### Details
+- Valores típicos ahora son visibles: `24.size(context)` produce ~9.6px en iPhone (375px width)
+- Parámetros multi-plataforma ahora respetan correctamente la precedencia iOS > mobile > fallback
+- Nueva clase `ResponsiveDebug` para diagnosticar problemas de detección de dispositivo
+
 ## [1.5.0] - 2024-12-19
 ### BREAKING CHANGES
 - **API Unificada**: Eliminadas todas las funciones globales `w()`, `h()`, `sp()`
