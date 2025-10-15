@@ -316,11 +316,10 @@ class MultiPlatformExamplePage extends StatelessWidget {
                 child: Text(
                   'Adaptive Width Container',
                   style: TextStyle(
-                    fontSize: sp(context,
-                      web: 0.02,
-                      mobile: 0.035,
-                      tablet: 0.025,
-                      fallback: 0.03,
+                    fontSize: 3.sp(context,
+                      web: 2,
+                      mobile: 3.5,
+                      tablet: 2.5,
                     ),
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -340,21 +339,19 @@ class MultiPlatformExamplePage extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    height: h(context,
-                      web: 0.15,
-                      mobile: 0.25,
-                      tablet: 0.18,
-                      desktop: 0.12,
-                      fallback: 0.2,
+                    height: 20.h(context,
+                      web: 15,
+                      mobile: 25,
+                      tablet: 18,
+                      desktop: 12,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.green[300],
                       borderRadius: BorderRadius.circular(
-                        8.radiusFor(context,
+                        8.radius(context,
                           mobile: 6,
                           tablet: 10,
                           desktop: 12,
-                          fallback: 8,
                         )
                       ),
                     ),
@@ -374,11 +371,10 @@ class MultiPlatformExamplePage extends StatelessWidget {
                 SizedBox(width: 12.size(context)),
                 Expanded(
                   child: Container(
-                    height: h(context,
-                      web: 0.1,
-                      mobile: 0.2,
-                      tablet: 0.15,
-                      fallback: 0.18,
+                    height: 18.h(context,
+                      web: 10,
+                      mobile: 20,
+                      tablet: 15,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.orange[300], 
@@ -613,11 +609,10 @@ class SpecializedExtensionsPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.orange[200],
                       borderRadius: BorderRadius.circular(
-                        16.radiusFor(context,
+                        16.radius(context,
                           mobile: 12,
                           tablet: 20,
                           desktop: 24,
-                          fallback: 16,
                         )
                       ),
                     ),
@@ -710,11 +705,10 @@ class SpecializedExtensionsPage extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      flex: 4.flexFor(context,
+                      flex: 4.flexValue(context,
                         mobile: 3,
                         tablet: 5,
                         desktop: 6,
-                        fallback: 4,
                       ),
                       child: Container(
                         height: 50.size(context),
@@ -736,11 +730,10 @@ class SpecializedExtensionsPage extends StatelessWidget {
                     ),
                     SizedBox(width: 8.size(context)),
                     Expanded(
-                      flex: 2.flexFor(context,
+                      flex: 2.flexValue(context,
                         mobile: 2,
                         tablet: 2,
                         desktop: 1,
-                        fallback: 2,
                       ),
                       child: Container(
                         height: 50.size(context),
@@ -913,11 +906,10 @@ class PracticalExamplePage extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              flex: 4.flexFor(context,
+              flex: 4.flexValue(context,
                 mobile: 3,
                 tablet: 4,
                 desktop: 5,
-                fallback: 4,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -925,11 +917,10 @@ class PracticalExamplePage extends StatelessWidget {
                   Text(
                     'Welcome Back!',
                     style: TextStyle(
-                      fontSize: sp(context,
-                        mobile: 0.045,
-                        tablet: 0.035,
-                        desktop: 0.03,
-                        fallback: 0.04,
+                      fontSize: 4.sp(context,
+                        mobile: 4.5,
+                        tablet: 3.5,
+                        desktop: 3,
                       ),
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -951,11 +942,10 @@ class PracticalExamplePage extends StatelessWidget {
               flex: 1.flexValue(context),
               child: Icon(
                 Icons.dashboard,
-                size: 45.sizeFor(context,
+                size: 45.size(context,
                   mobile: 40,
                   tablet: 50,
                   desktop: 60,
-                  fallback: 45,
                 ),
                 color: Colors.white,
               ),
@@ -999,11 +989,10 @@ class PracticalExamplePage extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 24.sizeFor(context,
+              size: 24.size(context,
                 mobile: 20,
                 tablet: 28,
                 desktop: 32,
-                fallback: 24,
               ),
               color: color,
             ),
@@ -1034,11 +1023,10 @@ class PracticalExamplePage extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          flex: 2.flexFor(context,
+          flex: 2.flexValue(context,
             mobile: 1,
             tablet: 2,
             desktop: 2,
-            fallback: 2,
           ),
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(

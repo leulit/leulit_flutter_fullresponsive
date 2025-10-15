@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScreenSizeInitializer(
       child: MaterialApp(
-        title: 'Leulit Responsive v1.4.0 Demo',
+        title: 'Leulit Responsive v1.5.0 Demo',
         theme: ThemeData(primarySwatch: Colors.blue),
         home: ResponsiveDemo(),
       ),
@@ -38,7 +38,7 @@ class ResponsiveDemo extends StatelessWidget {
         ),
         leading: Icon(
           Icons.menu,
-          size: 24.sizeFor(context, mobile: 20, tablet: 28, desktop: 32),
+          size: 24.size(context, mobile: 20, tablet: 28, desktop: 32),
         ),
         actions: [
           IconButton(
@@ -129,7 +129,7 @@ class ResponsiveDemo extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.favorite,
-                      size: 28.sizeFor(context, mobile: 24, tablet: 32, desktop: 36),
+                      size: 28.size(context, mobile: 24, tablet: 32, desktop: 36),
                       color: Colors.red,
                     ),
                     Text('Multi-platform', style: TextStyle(fontSize: 2.sp(context))),
@@ -178,7 +178,7 @@ class ResponsiveDemo extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.green[100],
               borderRadius: BorderRadius.circular(
-                16.radiusFor(context, mobile: 12, tablet: 20, desktop: 24),
+                16.radius(context, mobile: 12, tablet: 20, desktop: 24),
               ),
             ),
             child: Center(
@@ -254,7 +254,7 @@ class ResponsiveDemo extends StatelessWidget {
             
             // Flex multi-plataforma
             Text(
-              'Flex Multi-Plataforma (.flexFor())',
+              'Flex Multi-Plataforma (.flexValue())',
               style: TextStyle(
                 fontSize: 3.sp(context),
                 fontWeight: FontWeight.w500,
@@ -264,7 +264,7 @@ class ResponsiveDemo extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 4.flexFor(context, mobile: 3, tablet: 5, desktop: 6),
+                  flex: 4.flexValue(context, mobile: 3, tablet: 5, desktop: 6),
                   child: Container(
                     height: 50.size(context),
                     color: Colors.purple[300],
@@ -281,7 +281,7 @@ class ResponsiveDemo extends StatelessWidget {
                 ),
                 SizedBox(width: 8.size(context)),
                 Expanded(
-                  flex: 2.flexFor(context, mobile: 2, tablet: 2, desktop: 1),
+                  flex: 2.flexValue(context, mobile: 2, tablet: 2, desktop: 1),
                   child: Container(
                     height: 50.size(context),
                     color: Colors.orange[300],
@@ -316,11 +316,11 @@ class ResponsiveDemo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header con icono
-            Row(
+              Row(
               children: [
                 Icon(
                   Icons.notifications_active,
-                  size: 28.sizeFor(context, mobile: 24, tablet: 32, desktop: 36),
+                  size: 28.size(context, mobile: 24, tablet: 32, desktop: 36),
                   color: Colors.blue[600],
                 ),
                 SizedBox(width: 12.size(context)),
@@ -370,7 +370,7 @@ class ResponsiveDemo extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 2.flexFor(context, mobile: 1, tablet: 2, desktop: 2),
+                  flex: 2.flexValue(context, mobile: 1, tablet: 2, desktop: 2),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(

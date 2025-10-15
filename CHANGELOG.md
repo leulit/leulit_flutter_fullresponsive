@@ -1,5 +1,46 @@
 # Changelog
 
+## [1.5.0] - 2024-12-19
+### BREAKING CHANGES
+- **API Unificada**: Eliminadas todas las funciones globales `w()`, `h()`, `sp()`
+- **Extension Methods Unificados**: Todos los métodos `.w()`, `.h()`, `.sp()` ahora aceptan parámetros opcionales multi-plataforma
+- **Sintaxis Simplificada**: Un solo patrón de uso para todos los casos: `value.method(context, plataforma: valor)`
+
+### Added
+- **Parámetros Multi-Plataforma Unificados**: Todos los extension methods ahora soportan:
+  - `web`: Valores específicos para aplicaciones web
+  - `ios`: Valores específicos para iOS  
+  - `android`: Valores específicos para Android
+  - `mobile`: Valores para móviles (iOS + Android)
+  - `tablet`: Valores para tablets (>= 600px)
+  - `desktop`: Valores para aplicaciones desktop
+- **ResponsiveSize Unificado**: `.size()` ahora acepta parámetros multi-plataforma
+- **ResponsiveRadius Unificado**: `.radius()` ahora acepta parámetros multi-plataforma  
+- **ResponsiveFlex Unificado**: `.flexValue()` ahora acepta parámetros multi-plataforma
+
+### Enhanced
+- **Consistencia Total**: Un solo patrón de API para toda la librería
+- **Mejor Developer Experience**: IntelliSense más limpio sin funciones globales
+- **Precedencia Inteligente**: Plataforma específica > Categoría > Valor base
+- **Performance Mantenida**: Misma optimización DeviceType con nueva API
+
+### Removed
+- ❌ Funciones globales `w(context, ...)`, `h(context, ...)`, `sp(context, ...)`
+- ❌ Métodos `sizeFor()`, `radiusFor()`, `flexFor()` (reemplazados por parámetros opcionales)
+
+### Migration Guide
+```dart
+// ❌ v1.4.x (API inconsistente)
+width: w(context, web: 30, mobile: 80)
+width: 50.w(context)
+size: 24.sizeFor(context, tablet: 28)
+
+// ✅ v1.5.0 (API unificada)  
+width: 50.w(context, web: 30, mobile: 80)
+width: 50.w(context)
+size: 24.size(context, tablet: 28)
+```
+
 ## [1.4.1] - 2024-12-19
 ### Documentation
 - **Added Comprehensive Example App**: Complete 4-page demonstration app showcasing all library features

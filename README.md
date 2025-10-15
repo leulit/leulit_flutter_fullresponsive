@@ -3,13 +3,14 @@
 [![pub package](https://img.shields.io/pub/v/leulit_flutter_fullresponsive.svg)](https://pub.dev/packages/leulit_flutter_fullresponsive)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Una librería agnóstica de alto rendimiento para responsividad en Flutter usando `InheritedWidget` y Extension Methods. Proporciona una API simple y eficiente para crear interfaces que se adapten a diferentes tamaños de pantalla.
+Una librería agnóstica de alto rendimiento para responsividad en Flutter usando `InheritedWidget` y Extension Methods. Proporciona una API unificada y eficiente para crear interfaces que se adapten a diferentes tamaños de pantalla y plataformas.
 
 ## ✨ Características
 
 - 🚀 **Alto rendimiento**: Utiliza `InheritedWidget` para propagación eficiente
 - 📱 **Completamente responsive**: Adapta automáticamente el ancho, alto y tamaño de fuente
-- 🎯 **API intuitiva**: Extension methods simples (.w(), .h(), .sp())
+- 🎯 **API unificada**: Extension methods simples (.w(), .h(), .sp()) con soporte multi-plataforma
+- 🌐 **Multi-plataforma**: Valores específicos para web, iOS, Android, tablet, desktop
 - ♿ **Accesibilidad**: Respeta la configuración de escala de texto del usuario
 - 🔒 **Type-safe**: Aprovecha el null safety de Dart
 - 📦 **Ligero**: Sin dependencias externas, solo Flutter SDK
@@ -22,7 +23,7 @@ Agrega la dependencia a tu `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  leulit_flutter_fullresponsive: ^1.2.0
+  leulit_flutter_fullresponsive: ^1.5.0
 ```
 
 Ejecuta:
@@ -82,7 +83,7 @@ class MyApp extends StatelessWidget {
 
 ### 2. Usando las extensiones
 
-Una vez configurado, puedes usar las extensiones en cualquier parte de tu aplicación. **Ahora soporta dos formatos:**
+Una vez configurado, puedes usar las extensiones en cualquier parte de tu aplicación. **API unificada v1.5.0 con soporte multi-plataforma:**
 
 ```dart
 class HomeScreen extends StatelessWidget {
@@ -90,22 +91,32 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Formato tradicional (0-100)
+        // Uso básico (comportamiento adaptativo automático)
         width: 80.w(context),        // 80% del ancho de pantalla
         height: 50.h(context),       // 50% del alto de pantalla
         
-        // O formato decimal (0-1) para mayor precisión
-        // width: 0.8.w(context),       // Equivalente a 80%
-        // height: 0.5.h(context),      // Equivalente a 50%
+        // Uso multi-plataforma - valores específicos por dispositivo
+        width: 60.w(context, 
+          web: 40,      // 40% en web
+          mobile: 90,   // 90% en móvil
+          tablet: 70,   // 70% en tablet
+        ),
         
-        // Valores ultra precisos
-        // width: 0.076543.w(context),  // 7.6543% exacto
+        // Formato decimal para mayor precisión
+        width: 0.8.w(context, web: 0.4, mobile: 0.9),
         
         child: Text(
           'Texto responsive',
           style: TextStyle(
-            fontSize: 4.sp(context),  // Tamaño de fuente responsive
-            // o fontSize: 0.03.sp(context), // Formato decimal
+            // Tamaño básico
+            fontSize: 4.sp(context),
+            
+            // Con valores específicos por plataforma
+            fontSize: 3.sp(context,
+              web: 2.5,
+              mobile: 4,
+              tablet: 3.5,
+            ),
           ),
         ),
       ),
@@ -116,71 +127,64 @@ class HomeScreen extends StatelessWidget {
 
 ## 📚 API Reference
 
-### Extension Methods
+### 🚀 Extension Methods Unificados (v1.5.0)
 
-#### `.w(BuildContext context)`
-Calcula un porcentaje del ancho de pantalla. Acepta dos formatos:
+#### `.w(BuildContext context, {...})`
+Calcula un porcentaje del ancho de pantalla con soporte multi-plataforma:
 ```dart
-// Formato tradicional (0-100)
+// Uso básico
 Container(width: 50.w(context))     // 50% del ancho
 
-// Formato decimal (0-1) para mayor precisión
-Container(width: 0.5.w(context))    // 50% del ancho
-Container(width: 0.076543.w(context)) // 7.6543% exacto
+// Con valores específicos por plataforma
+Container(width: 60.w(context,
+  web: 40,        // 40% en web
+  mobile: 80,     // 80% en móvil (iOS + Android)
+  tablet: 65,     // 65% en tablet
+  ios: 85,        // 85% específico para iOS
+  android: 75,    // 75% específico para Android
+  desktop: 35,    // 35% en aplicaciones desktop
+))
+
+// Formato decimal para mayor precisión
+Container(width: 0.5.w(context, web: 0.4, mobile: 0.8))
 ```
 
-#### `.h(BuildContext context)`
-Calcula un porcentaje del alto de pantalla. Acepta dos formatos:
+#### `.h(BuildContext context, {...})`
+Calcula un porcentaje del alto de pantalla con soporte multi-plataforma:
 ```dart
-// Formato tradicional (0-100)
+// Uso básico
 Container(height: 30.h(context))    // 30% del alto
 
-// Formato decimal (0-1) para mayor precisión
-Container(height: 0.3.h(context))   // 30% del alto
-Container(height: 0.123456.h(context)) // 12.3456% exacto
+// Con valores específicos por plataforma
+Container(height: 25.h(context,
+  web: 20,
+  mobile: 35,
+  tablet: 28,
+))
+
+// Formato decimal
+Container(height: 0.3.h(context, web: 0.2, tablet: 0.35))
 ```
 
-#### `.sp(BuildContext context)`
-Calcula un tamaño de fuente responsive que respeta la configuración de accesibilidad. Acepta dos formatos:
+#### `.sp(BuildContext context, {...})`
+Calcula un tamaño de fuente responsive que respeta la configuración de accesibilidad:
 ```dart
-// Formato tradicional
-Text(
-  'Hola',
-  style: TextStyle(fontSize: 3.sp(context)), // Fuente responsive
-)
+// Uso básico
+Text('Hola', style: TextStyle(fontSize: 3.sp(context)))
+
+// Con valores específicos por plataforma
+Text('Hola', style: TextStyle(
+  fontSize: 3.sp(context,
+    web: 2.5,
+    mobile: 4,
+    tablet: 3.5,
+  )
+))
 
 // Formato decimal para mayor control
-Text(
-  'Hola',
-  style: TextStyle(fontSize: 0.025.sp(context)), // Control preciso
-)
-```
-
-### 🆕 Funciones Multi-Plataforma
-
-#### `w(BuildContext context, {...})`
-Ancho responsive específico por plataforma:
-```dart
-// Ejemplo con diferentes plataformas
-width: w(context, web: 0.4, mobile: 0.9, tablet: 0.6, fallback: 0.5)
-
-// Solo especificar algunas plataformas
-width: w(context, web: 30, mobile: 80) // Formato porcentaje
-
-// Específico por sistema operativo
-width: w(context, ios: 0.8, android: 0.85, web: 0.4)
-```
-
-#### `h(BuildContext context, {...})`
-Alto responsive específico por plataforma:
-```dart
-height: h(context, web: 0.3, mobile: 0.5, tablet: 0.4, fallback: 0.35)
-```
-
-#### `sp(BuildContext context, {...})`
-Tamaño de fuente responsive específico por plataforma:
-```dart
-fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025)
+Text('Hola', style: TextStyle(
+  fontSize: 0.025.sp(context, web: 0.02, mobile: 0.03)
+))
 ```
 
 ### Widgets
@@ -230,9 +234,21 @@ class FormatComparison extends StatelessWidget {
 }
 ```
 
-### 🚀 **NUEVO: Funciones Multi-Plataforma**
+### 🌐 Plataformas Soportadas
 
-**Ahora puedes especificar valores diferentes para cada plataforma:**
+La API unificada detecta automáticamente la plataforma y aplica los valores apropiados:
+
+- **`web`**: Aplicaciones web
+- **`ios`**: Específico para iOS
+- **`android`**: Específico para Android  
+- **`mobile`**: Ambos iOS y Android (precedencia menor que ios/android específicos)
+- **`tablet`**: Tablets (detectado por tamaño de pantalla ≥600px)
+- **`desktop`**: Aplicaciones de escritorio
+
+#### Orden de precedencia:
+1. Plataforma específica (`ios`, `android`, `web`)
+2. Categoría (`mobile`, `tablet`, `desktop`)
+3. Valor base (primer parámetro)
 
 ```dart
 class MultiPlatformExample extends StatelessWidget {
@@ -240,31 +256,28 @@ class MultiPlatformExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // Diferentes anchos según la plataforma
-      width: w(context, 
-        web: 0.3,      // 30% en web
-        mobile: 0.9,   // 90% en móviles (iOS y Android)
-        tablet: 0.6,   // 60% en tablets
-        fallback: 0.5, // 50% como fallback
+      width: 50.w(context, 
+        web: 30,      // 30% en web
+        mobile: 90,   // 90% en móviles (iOS y Android)
+        tablet: 60,   // 60% en tablets
       ),
       
       // Diferentes alturas según la plataforma
-      height: h(context,
-        web: 0.4,       // 40% en web
-        ios: 0.25,      // 25% específico para iOS
-        android: 0.3,   // 30% específico para Android
-        tablet: 0.35,   // 35% en tablets
-        fallback: 0.28, // 28% como fallback
+      height: 40.h(context,
+        web: 35,       // 35% en web
+        ios: 45,       // 45% específico para iOS
+        android: 42,   // 42% específico para Android
+        tablet: 38,    // 38% en tablets
       ),
       
       child: Text(
         'Responsive Multi-Platform',
         style: TextStyle(
           // Diferentes tamaños de fuente según la plataforma
-          fontSize: sp(context,
-            web: 0.02,    // Tamaño para web
-            mobile: 0.04, // Tamaño para móviles
-            tablet: 0.03, // Tamaño para tablets
-            fallback: 0.025,
+          fontSize: 3.sp(context,
+            web: 2.5,    // Tamaño para web
+            mobile: 4,   // Tamaño para móviles
+            tablet: 3.5, // Tamaño para tablets
           ),
         ),
       ),
@@ -272,15 +285,6 @@ class MultiPlatformExample extends StatelessWidget {
   }
 }
 ```
-
-#### Plataformas soportadas:
-- **`web`**: Aplicaciones web y desktop
-- **`ios`**: Específico para iOS
-- **`android`**: Específico para Android  
-- **`mobile`**: Ambos iOS y Android
-- **`tablet`**: Tablets (detectado por tamaño de pantalla ≥600px)
-- **`desktop`**: Aplicaciones de escritorio
-- **`fallback`**: Valor por defecto si no se encuentra una plataforma específica
 
 ### Layout responsive completo
 
@@ -350,11 +354,11 @@ class ResponsiveLayout extends StatelessWidget {
 }
 ```
 
-## 🎨 **NUEVO: Extensiones Especializadas**
+## 🎨 Extensiones Especializadas
 
 ### 📏 ResponsiveSize - Para Iconos, Padding, Margins
 
-Ahora puedes hacer responsive fácilmente los tamaños de iconos, padding, margins y otros elementos UI pequeños:
+Optimiza tamaños de iconos, padding, margins y otros elementos UI pequeños:
 
 ```dart
 class IconExample extends StatelessWidget {
@@ -362,7 +366,7 @@ class IconExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Iconos responsive
+        // Iconos responsive básicos
         Icon(
           Icons.star,
           size: 24.size(context), // Tamaño responsive automático
@@ -372,7 +376,7 @@ class IconExample extends StatelessWidget {
         // Con valores específicos por plataforma
         Icon(
           Icons.favorite,
-          size: 20.sizeFor(context,
+          size: 20.size(context,
             mobile: 18,   // Más pequeño en móviles
             tablet: 24,   // Medio en tablets
             desktop: 32,  // Más grande en desktop
@@ -386,11 +390,11 @@ class IconExample extends StatelessWidget {
           child: Text('Padding responsive'),
         ),
         
-        // Margins responsive
+        // Margins responsive con plataformas específicas
         Container(
           margin: EdgeInsets.symmetric(
-            horizontal: 20.size(context),
-            vertical: 12.size(context),
+            horizontal: 20.size(context, web: 30, mobile: 15),
+            vertical: 12.size(context, tablet: 16),
           ),
           child: Text('Margin responsive'),
         ),
@@ -424,7 +428,7 @@ class RadiusExample extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.green,
             borderRadius: BorderRadius.circular(
-              8.radiusFor(context,
+              8.radius(context,
                 mobile: 6,    // Esquinas más suaves en móvil
                 tablet: 12,   // Intermedias en tablet
                 desktop: 20,  // Más pronunciadas en desktop
@@ -440,9 +444,9 @@ class RadiusExample extends StatelessWidget {
             color: Colors.purple,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16.radius(context)),
-              topRight: Radius.circular(8.radius(context)),
+              topRight: Radius.circular(8.radius(context, web: 12)),
               bottomLeft: Radius.circular(4.radius(context)),
-              bottomRight: Radius.circular(20.radius(context)),
+              bottomRight: Radius.circular(20.radius(context, mobile: 16)),
             ),
           ),
           child: Text('Esquinas asimétricas'),
@@ -491,7 +495,7 @@ class FlexExample extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              flex: 4.flexFor(context,
+              flex: 4.flexValue(context,
                 mobile: 3,    // Más equilibrado en móvil
                 tablet: 5,    // Más prominente en tablet
                 desktop: 6,   // Dominante en desktop
@@ -503,7 +507,7 @@ class FlexExample extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 2.flexFor(context,
+              flex: 2.flexValue(context,
                 mobile: 2,
                 tablet: 2,
                 desktop: 1,   // Menos espacio en desktop

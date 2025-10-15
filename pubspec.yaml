@@ -1,6 +1,6 @@
 name: leulit_flutter_fullresponsive
-description: Librería agnóstica de alto rendimiento para responsividad usando InheritedWidget y Extension Methods.
-version: 1.4.1
+description: Librería agnóstica de alto rendimiento para responsividad usando InheritedWidget y Extension Methods con API unificada.
+version: 1.5.0
 homepage: https://github.com/leulit/leulit_flutter_fullresponsive
 repository: https://github.com/leulit/leulit_flutter_fullresponsive
 issue_tracker: https://github.com/leulit/leulit_flutter_fullresponsive/issues

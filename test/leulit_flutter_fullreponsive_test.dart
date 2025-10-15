@@ -171,7 +171,7 @@ void main() {
       expect(normalizeValue(7.6543), equals(0.076543));
     });
 
-    testWidgets('should handle multi-platform width function', (WidgetTester tester) async {
+    testWidgets('should handle multi-platform width extension method', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: ScreenSizeInitializer(
@@ -179,8 +179,8 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   body: SizedBox(
-                    // Usando la nueva función multi-plataforma
-                    width: w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6),
+                    // Usando el extension method unificado con parámetros multi-plataforma
+                    width: 60.w(context, web: 30, mobile: 80, tablet: 50),
                     child: const Text('Test'),
                   ),
                 );
@@ -193,18 +193,19 @@ void main() {
       final context = tester.element(find.byType(Text));
       
       // Verificar que la función retorna un valor positivo
-      final multiPlatformWidth = w(context, web: 0.3, mobile: 0.8, tablet: 0.5, fallback: 0.6);
+      final multiPlatformWidth = 60.w(context, web: 30, mobile: 80, tablet: 50);
       expect(multiPlatformWidth, greaterThan(0));
       
-      // Verificar con diferentes combinaciones
-      final webWidth = w(context, web: 0.5, fallback: 0.3);
-      final mobileWidth = w(context, mobile: 0.7, fallback: 0.3);
+      // Verificar uso básico (sin parámetros multi-plataforma)
+      final basicWidth = 50.w(context);
+      expect(basicWidth, greaterThan(0));
       
-      expect(webWidth, greaterThan(0));
-      expect(mobileWidth, greaterThan(0));
+      // Verificar con formato decimal
+      final decimalWidth = 0.5.w(context, web: 0.3, mobile: 0.8);
+      expect(decimalWidth, greaterThan(0));
     });
 
-    testWidgets('should handle multi-platform height function', (WidgetTester tester) async {
+    testWidgets('should handle multi-platform height extension method', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: ScreenSizeInitializer(
@@ -212,7 +213,7 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   body: SizedBox(
-                    height: h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35),
+                    height: 35.h(context, web: 20, mobile: 40, tablet: 30),
                     child: const Text('Test'),
                   ),
                 );
@@ -225,15 +226,19 @@ void main() {
       final context = tester.element(find.byType(Text));
       
       // Verificar que la función retorna un valor positivo
-      final multiPlatformHeight = h(context, web: 0.2, mobile: 0.4, tablet: 0.3, fallback: 0.35);
+      final multiPlatformHeight = 35.h(context, web: 20, mobile: 40, tablet: 30);
       expect(multiPlatformHeight, greaterThan(0));
       
-      // Verificar con formato porcentaje
-      final heightPercentage = h(context, web: 20, mobile: 40, fallback: 35);
-      expect(heightPercentage, greaterThan(0));
+      // Verificar uso básico (sin parámetros multi-plataforma)
+      final basicHeight = 25.h(context);
+      expect(basicHeight, greaterThan(0));
+      
+      // Verificar con formato decimal
+      final decimalHeight = 0.25.h(context, web: 0.2, mobile: 0.4);
+      expect(decimalHeight, greaterThan(0));
     });
 
-    testWidgets('should handle multi-platform font size function', (WidgetTester tester) async {
+    testWidgets('should handle multi-platform font size extension method', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: ScreenSizeInitializer(
@@ -243,7 +248,7 @@ void main() {
                   body: Text(
                     'Test',
                     style: TextStyle(
-                      fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025),
+                      fontSize: 3.sp(context, web: 2, mobile: 4, tablet: 3),
                     ),
                   ),
                 );
@@ -256,35 +261,16 @@ void main() {
       final context = tester.element(find.byType(Text));
       
       // Verificar que la función retorna un valor positivo
-      final multiPlatformSp = sp(context, web: 0.02, mobile: 0.04, tablet: 0.03, fallback: 0.025);
+      final multiPlatformSp = 3.sp(context, web: 2, mobile: 4, tablet: 3);
       expect(multiPlatformSp, greaterThan(0));
       
-      // Verificar con formato tradicional
-      final spTraditional = sp(context, web: 2, mobile: 4, fallback: 3);
-      expect(spTraditional, greaterThan(0));
-    });
-
-    testWidgets('should throw error when no values provided to multi-platform functions', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ScreenSizeInitializer(
-            child: Builder(
-              builder: (context) {
-                return const Scaffold(
-                  body: Text('Test'),
-                );
-              },
-            ),
-          ),
-        ),
-      );
-
-      final context = tester.element(find.byType(Text));
+      // Verificar uso básico (sin parámetros multi-plataforma)
+      final basicSp = 3.sp(context);
+      expect(basicSp, greaterThan(0));
       
-      // Verificar que se lance error cuando no se proporcionan valores
-      expect(() => w(context), throwsA(isA<FlutterError>()));
-      expect(() => h(context), throwsA(isA<FlutterError>()));
-      expect(() => sp(context), throwsA(isA<FlutterError>()));
+      // Verificar con formato decimal
+      final decimalSp = 0.025.sp(context, web: 0.02, mobile: 0.04);
+      expect(decimalSp, greaterThan(0));
     });
 
     testWidgets('performance test: DeviceType should be calculated only once', (WidgetTester tester) async {
@@ -294,14 +280,14 @@ void main() {
           home: ScreenSizeInitializer(
             child: Builder(
               builder: (context) {
-                // Simulamos múltiples llamadas a funciones multi-plataforma
+                // Simulamos múltiples llamadas a extension methods con parámetros multi-plataforma
                 // Si DeviceType se calculara en cada llamada, esto sería lento
-                final width1 = w(context, web: 0.1, mobile: 0.2, fallback: 0.15);
-                final width2 = w(context, web: 0.2, mobile: 0.3, fallback: 0.25);
-                final height1 = h(context, web: 0.05, mobile: 0.1, fallback: 0.075);
-                final height2 = h(context, web: 0.1, mobile: 0.15, fallback: 0.125);
-                final fontSize1 = sp(context, web: 0.01, mobile: 0.02, fallback: 0.015);
-                final fontSize2 = sp(context, web: 0.02, mobile: 0.03, fallback: 0.025);
+                final width1 = 15.w(context, web: 10, mobile: 20);
+                final width2 = 25.w(context, web: 20, mobile: 30);
+                final height1 = 8.h(context, web: 5, mobile: 10);
+                final height2 = 12.h(context, web: 10, mobile: 15);
+                final fontSize1 = 2.sp(context, web: 1.5, mobile: 2.5);
+                final fontSize2 = 3.sp(context, web: 2.5, mobile: 3.5);
                 
                 return Scaffold(
                   body: SizedBox(
@@ -326,10 +312,10 @@ void main() {
       final stopwatch = Stopwatch()..start();
       
       for (int i = 0; i < 1000; i++) {
-        // Múltiples llamadas que antes requerían recalcular DeviceType
-        w(context, web: 0.1, mobile: 0.2, fallback: 0.15);
-        h(context, web: 0.05, mobile: 0.1, fallback: 0.075);
-        sp(context, web: 0.01, mobile: 0.02, fallback: 0.015);
+        // Múltiples llamadas usando extension methods con parámetros multi-plataforma
+        15.w(context, web: 10, mobile: 20);
+        8.h(context, web: 5, mobile: 10);
+        2.sp(context, web: 1.5, mobile: 2.5);
       }
       
       stopwatch.stop();

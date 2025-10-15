@@ -73,6 +73,7 @@ class ScreenSizeInitializer extends StatelessWidget {
 /// Acepta dos formatos:
 /// - Porcentajes tradicionales: 0-100 (ej: 80.w(context) = 80%)
 /// - Decimales precisos: 0-1 (ej: 0.8.w(context) = 80%)
+/// Ahora con soporte multi-plataforma integrado.
 extension ScreenScale on num {
   
   /// Helper para obtener el ScreenInfo de forma segura y eficiente.
@@ -103,34 +104,146 @@ extension ScreenScale on num {
 
   /// **Ancho Responsive:** Obtiene el ancho como porcentaje de la pantalla.
   /// Acepta valores de 0-100 (ej: 80.w(context)) o 0-1 (ej: 0.8.w(context))
-  double w(BuildContext context) {
+  /// Con soporte multi-plataforma opcional.
+  /// 
+  /// Ejemplos:
+  /// ```dart
+  /// // Uso básico
+  /// width: 80.w(context)  // 80% del ancho
+  /// 
+  /// // Multi-plataforma
+  /// width: 50.w(context, web: 30, mobile: 80, tablet: 60)
+  /// ```
+  double w(BuildContext context, {
+    num? web,
+    num? ios,
+    num? android,
+    num? mobile,
+    num? tablet,
+    num? desktop,
+  }) {
     final screenInfo = _getInfo(context);
-    final normalizedValue = _normalizeValue(this);
+    
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      final normalizedValue = _normalizeValue(this);
+      return screenInfo.width * normalizedValue;
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final normalizedValue = _getValueForDevice(screenInfo, values, this);
     return screenInfo.width * normalizedValue;
   }
 
   /// **Alto Responsive:** Obtiene el alto como porcentaje de la pantalla.
   /// Acepta valores de 0-100 (ej: 30.h(context)) o 0-1 (ej: 0.3.h(context))
-  double h(BuildContext context) {
+  /// Con soporte multi-plataforma opcional.
+  /// 
+  /// Ejemplos:
+  /// ```dart
+  /// // Uso básico
+  /// height: 30.h(context)  // 30% del alto
+  /// 
+  /// // Multi-plataforma
+  /// height: 25.h(context, web: 20, mobile: 35, tablet: 28)
+  /// ```
+  double h(BuildContext context, {
+    num? web,
+    num? ios,
+    num? android,
+    num? mobile,
+    num? tablet,
+    num? desktop,
+  }) {
     final screenInfo = _getInfo(context);
-    final normalizedValue = _normalizeValue(this);
+    
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      final normalizedValue = _normalizeValue(this);
+      return screenInfo.height * normalizedValue;
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final normalizedValue = _getValueForDevice(screenInfo, values, this);
     return screenInfo.height * normalizedValue;
   }
   
   /// **Tamaño de Fuente Responsive (sp):** Escala la fuente usando un porcentaje
   /// del ancho base y aplica el factor de escala de accesibilidad del usuario.
   /// Acepta valores de 0-100 (ej: 3.sp(context)) o 0-1 (ej: 0.03.sp(context))
-  double sp(BuildContext context) {
+  /// Con soporte multi-plataforma opcional.
+  /// 
+  /// Ejemplos:
+  /// ```dart
+  /// // Uso básico
+  /// fontSize: 3.sp(context)  // Fuente responsive
+  /// 
+  /// // Multi-plataforma
+  /// fontSize: 3.sp(context, web: 2.5, mobile: 3.5, tablet: 3.2)
+  /// ```
+  double sp(BuildContext context, {
+    num? web,
+    num? ios,
+    num? android,
+    num? mobile,
+    num? tablet,
+    num? desktop,
+  }) {
     final screenInfo = _getInfo(context);
     
-    // Para sp, usamos una base diferente dependiendo del formato
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      // Para sp, usamos una base diferente dependiendo del formato
+      final double baseSize;
+      if (this <= 1) {
+        // Si es decimal (0-1), multiplicamos directamente por el ancho
+        baseSize = screenInfo.width * this;
+      } else {
+        // Si es porcentaje (0-100), usamos la lógica original
+        baseSize = screenInfo.width * (this / 1000);
+      }
+      
+      return baseSize * screenInfo.textScale;
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
+    final values = <DeviceType, num>{};
+    if (web != null) values[DeviceType.web] = web;
+    if (ios != null) values[DeviceType.ios] = ios;
+    if (android != null) values[DeviceType.android] = android;
+    if (mobile != null) values[DeviceType.mobile] = mobile;
+    if (tablet != null) values[DeviceType.tablet] = tablet;
+    if (desktop != null) values[DeviceType.desktop] = desktop;
+    
+    final rawValue = _getValueForDevice(screenInfo, values, this);
+    
+    // Aplicar la misma lógica de escalado que en el modo básico
     final double baseSize;
-    if (this <= 1) {
+    if (rawValue <= 1) {
       // Si es decimal (0-1), multiplicamos directamente por el ancho
-      baseSize = screenInfo.width * this;
+      baseSize = screenInfo.width * rawValue;
     } else {
-      // Si es porcentaje (0-100), usamos la lógica original
-      baseSize = screenInfo.width * (this / 1000);
+      // Si es valor tradicional, usamos la lógica original
+      baseSize = screenInfo.width * (rawValue / 1000);
     }
     
     return baseSize * screenInfo.textScale;
@@ -148,47 +261,38 @@ extension ResponsiveSize on num {
   /// **Tamaño Responsive para Iconos, Padding, Margins:**
   /// Calcula un tamaño responsive basado en el ancho de pantalla.
   /// Optimizado para valores pequeños como icon sizes.
+  /// Con soporte multi-plataforma integrado.
   /// 
   /// Ejemplos:
-  /// - 24.size(context) // Tamaño de icono responsive
-  /// - 16.size(context) // Padding responsive
-  /// - 8.size(context)  // Margin responsive
-  double size(BuildContext context) {
-    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-    if (screenInfo == null) {
-      throw FlutterError('ResponsiveSize requiere ScreenSizeInitializer');
-    }
-    
-    // Base calculation: usa un factor más conservador para elementos UI pequeños
-    // Factor base: 2.5% del ancho de pantalla por cada unidad
-    return screenInfo.width * (this * 0.025 / 100);
-  }
-  
-  /// **Tamaño Responsive Multi-Plataforma para Iconos/UI:**
-  /// Permite diferentes tamaños según la plataforma
-  /// 
-  /// Ejemplo:
   /// ```dart
-  /// Icon(
-  ///   Icons.star,
-  ///   size: 24.sizeFor(context, mobile: 20, tablet: 28, desktop: 32),
-  /// )
+  /// // Uso básico
+  /// Icon(Icons.star, size: 24.size(context))
+  /// 
+  /// // Multi-plataforma
+  /// Icon(Icons.star, size: 24.size(context, mobile: 20, tablet: 28, desktop: 32))
   /// ```
-  double sizeFor(
-    BuildContext context, {
+  double size(BuildContext context, {
     num? web,
     num? ios,
     num? android,
     num? mobile,
-    num? tablet, 
+    num? tablet,
     num? desktop,
-    num? fallback,
   }) {
     final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
     if (screenInfo == null) {
       throw FlutterError('ResponsiveSize requiere ScreenSizeInitializer');
     }
     
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      // Base calculation: usa un factor más conservador para elementos UI pequeños
+      // Factor base: 2.5% del ancho de pantalla por cada unidad
+      return screenInfo.width * (this * 0.025 / 100);
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
     final values = <DeviceType, num>{};
     if (web != null) values[DeviceType.web] = web;
     if (ios != null) values[DeviceType.ios] = ios;
@@ -197,8 +301,8 @@ extension ResponsiveSize on num {
     if (tablet != null) values[DeviceType.tablet] = tablet;
     if (desktop != null) values[DeviceType.desktop] = desktop;
     
-    final normalizedValue = _getValueForDevice(screenInfo, values, fallback ?? this);
-    return screenInfo.width * (normalizedValue * 0.025);
+    final normalizedValue = _getValueForDevice(screenInfo, values, this);
+    return screenInfo.width * (normalizedValue * 0.025 / 100);
   }
 }
 
@@ -207,48 +311,37 @@ extension ResponsiveRadius on num {
   
   /// **Border Radius Responsive:**
   /// Calcula un border radius responsive basado en el tamaño de pantalla.
+  /// Con soporte multi-plataforma integrado.
   /// 
   /// Ejemplos:
-  /// - BorderRadius.circular(12.radius(context))
-  /// - BorderRadius.circular(8.radius(context)) 
-  double radius(BuildContext context) {
-    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-    if (screenInfo == null) {
-      throw FlutterError('ResponsiveRadius requiere ScreenSizeInitializer');
-    }
-    
-    // Factor base: 1.5% del ancho de pantalla por cada unidad de radius
-    return screenInfo.width * (this * 0.015 / 100);
-  }
-  
-  /// **Border Radius Responsive Multi-Plataforma:**
-  /// Permite diferentes radius según la plataforma
-  /// 
-  /// Ejemplo:
   /// ```dart
-  /// Container(
-  ///   decoration: BoxDecoration(
-  ///     borderRadius: BorderRadius.circular(
-  ///       12.radiusFor(context, mobile: 8, tablet: 16, desktop: 20)
-  ///     ),
-  ///   ),
-  /// )
+  /// // Uso básico
+  /// BorderRadius.circular(12.radius(context))
+  /// 
+  /// // Multi-plataforma
+  /// BorderRadius.circular(12.radius(context, mobile: 8, tablet: 16, desktop: 20))
   /// ```
-  double radiusFor(
-    BuildContext context, {
+  double radius(BuildContext context, {
     num? web,
     num? ios,
     num? android,
     num? mobile,
     num? tablet,
     num? desktop,
-    num? fallback,
   }) {
     final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
     if (screenInfo == null) {
       throw FlutterError('ResponsiveRadius requiere ScreenSizeInitializer');
     }
     
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      // Factor base: 1.5% del ancho de pantalla por cada unidad de radius
+      return screenInfo.width * (this * 0.015 / 100);
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
     final values = <DeviceType, num>{};
     if (web != null) values[DeviceType.web] = web;
     if (ios != null) values[DeviceType.ios] = ios;
@@ -257,8 +350,8 @@ extension ResponsiveRadius on num {
     if (tablet != null) values[DeviceType.tablet] = tablet;
     if (desktop != null) values[DeviceType.desktop] = desktop;
     
-    final normalizedValue = _getValueForDevice(screenInfo, values, fallback ?? this);
-    return screenInfo.width * (normalizedValue * 0.015);
+    final normalizedValue = _getValueForDevice(screenInfo, values, this);
+    return screenInfo.width * (normalizedValue * 0.015 / 100);
   }
 }
 
@@ -267,73 +360,65 @@ extension ResponsiveFlex on int {
   
   /// **Flex Value Responsive:**
   /// Ajusta valores de flex basándose en el tipo de dispositivo para mejores layouts.
+  /// Con soporte multi-plataforma integrado.
   /// 
   /// Ejemplos:
-  /// - Expanded(flex: 3.flexValue(context), child: widget)
-  /// - Flexible(flex: 2.flexValue(context), child: widget)
-  int flexValue(BuildContext context) {
-    final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-    if (screenInfo == null) {
-      throw FlutterError('ResponsiveFlex requiere ScreenSizeInitializer');
-    }
-    
-    // Ajuste de flex basado en el tipo de dispositivo
-    switch (screenInfo.deviceType) {
-      case DeviceType.mobile:
-        return this; // Mantener valor original en mobile
-      case DeviceType.tablet:
-        return (this * 1.2).round(); // Incrementar ligeramente en tablet
-      case DeviceType.desktop:
-        return (this * 1.5).round(); // Incrementar más en desktop
-      default:
-        return this;
-    }
-  }
-  
-  /// **Flex Value Multi-Plataforma:**
-  /// Permite diferentes valores de flex según la plataforma
-  /// 
-  /// Ejemplo:
   /// ```dart
-  /// Expanded(
-  ///   flex: 3.flexFor(context, mobile: 2, tablet: 4, desktop: 5),
-  ///   child: widget,
-  /// )
+  /// // Uso básico (ajuste automático)
+  /// Expanded(flex: 3.flexValue(context), child: widget)
+  /// 
+  /// // Multi-plataforma (valores específicos)
+  /// Expanded(flex: 3.flexValue(context, mobile: 2, tablet: 4, desktop: 5), child: widget)
   /// ```
-  int flexFor(
-    BuildContext context, {
+  int flexValue(BuildContext context, {
     int? web,
     int? ios,
     int? android,
     int? mobile,
     int? tablet,
     int? desktop,
-    int? fallback,
   }) {
     final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
     if (screenInfo == null) {
       throw FlutterError('ResponsiveFlex requiere ScreenSizeInitializer');
     }
     
+    // Si no se especifican parámetros multi-plataforma, usar comportamiento básico
+    if (web == null && ios == null && android == null && 
+        mobile == null && tablet == null && desktop == null) {
+      // Ajuste de flex basado en el tipo de dispositivo
+      switch (screenInfo.deviceType) {
+        case DeviceType.mobile:
+          return this; // Mantener valor original en mobile
+        case DeviceType.tablet:
+          return (this * 1.2).round(); // Incrementar ligeramente en tablet
+        case DeviceType.desktop:
+          return (this * 1.5).round(); // Incrementar más en desktop
+        default:
+          return this;
+      }
+    }
+    
+    // Usar lógica multi-plataforma con 'this' como fallback
     switch (screenInfo.deviceType) {
       case DeviceType.web:
-        return web ?? fallback ?? this;
+        return web ?? desktop ?? this;
       case DeviceType.ios:
-        return ios ?? mobile ?? fallback ?? this;
+        return ios ?? mobile ?? this;
       case DeviceType.android:
-        return android ?? mobile ?? fallback ?? this;
+        return android ?? mobile ?? this;
       case DeviceType.mobile:
-        return mobile ?? fallback ?? this;
+        return mobile ?? this;
       case DeviceType.tablet:
-        return tablet ?? fallback ?? this;
+        return tablet ?? this;
       case DeviceType.desktop:
-        return desktop ?? fallback ?? this;
+        return desktop ?? web ?? this;
     }
   }
 }
 
 // -----------------------------------------------------------------------------
-// 3. Funciones Multi-Plataforma para Valores Específicos por Dispositivo
+// 3. Helpers para Funcionalidad Multi-Plataforma
 // -----------------------------------------------------------------------------
 
 /// Helper para normalizar valores en las funciones multi-plataforma
@@ -346,7 +431,7 @@ double _normalizeMultiValue(num value) {
 double _getValueForDevice(
   ScreenInfo screenInfo,
   Map<DeviceType, num> values,
-  num? fallback,
+  num fallback,
 ) {
   final deviceType = screenInfo.deviceType; // ⚡ Ya calculado, acceso O(1)
   
@@ -382,137 +467,5 @@ double _getValueForDevice(
     return _normalizeMultiValue(values.values.first);
   }
   
-  if (fallback != null) {
-    return _normalizeMultiValue(fallback);
-  }
-  
-  throw FlutterError('No se encontró valor apropiado para el dispositivo $deviceType');
-}
-
-/// **Ancho Multi-Plataforma:** Obtiene el ancho basado en el tipo de dispositivo.
-/// 
-/// Ejemplo de uso:
-/// ```dart
-/// width: w(context, web: 0.3, mobile: 0.8, tablet: 0.5)
-/// width: w(context, ios: 50, android: 60, web: 30) // Formato porcentaje
-/// ```
-double w(
-  BuildContext context, {
-  num? web,
-  num? ios,
-  num? android,
-  num? mobile,
-  num? tablet,
-  num? desktop,
-  num? fallback,
-}) {
-  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-  if (screenInfo == null) {
-    throw FlutterError.fromParts([
-      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
-      ErrorDescription(
-        'Debes envolver tu aplicación con ScreenSizeInitializer para usar w().'
-      ),
-    ]);
-  }
-  
-  final values = <DeviceType, num>{};
-  if (web != null) values[DeviceType.web] = web;
-  if (ios != null) values[DeviceType.ios] = ios;
-  if (android != null) values[DeviceType.android] = android;
-  if (mobile != null) values[DeviceType.mobile] = mobile;
-  if (tablet != null) values[DeviceType.tablet] = tablet;
-  if (desktop != null) values[DeviceType.desktop] = desktop;
-  
-  final normalizedValue = _getValueForDevice(screenInfo, values, fallback);
-  return screenInfo.width * normalizedValue;
-}
-
-/// **Alto Multi-Plataforma:** Obtiene el alto basado en el tipo de dispositivo.
-/// 
-/// Ejemplo de uso:
-/// ```dart
-/// height: h(context, web: 0.2, mobile: 0.4, tablet: 0.3)
-/// height: h(context, ios: 25, android: 30, web: 20) // Formato porcentaje
-/// ```
-double h(
-  BuildContext context, {
-  num? web,
-  num? ios,
-  num? android,
-  num? mobile,
-  num? tablet,
-  num? desktop,
-  num? fallback,
-}) {
-  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-  if (screenInfo == null) {
-    throw FlutterError.fromParts([
-      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
-      ErrorDescription(
-        'Debes envolver tu aplicación con ScreenSizeInitializer para usar h().'
-      ),
-    ]);
-  }
-  
-  final values = <DeviceType, num>{};
-  if (web != null) values[DeviceType.web] = web;
-  if (ios != null) values[DeviceType.ios] = ios;
-  if (android != null) values[DeviceType.android] = android;
-  if (mobile != null) values[DeviceType.mobile] = mobile;
-  if (tablet != null) values[DeviceType.tablet] = tablet;
-  if (desktop != null) values[DeviceType.desktop] = desktop;
-  
-  final normalizedValue = _getValueForDevice(screenInfo, values, fallback);
-  return screenInfo.height * normalizedValue;
-}
-
-/// **Tamaño de Fuente Multi-Plataforma:** Obtiene el tamaño de fuente basado en el tipo de dispositivo.
-/// 
-/// Ejemplo de uso:
-/// ```dart
-/// fontSize: sp(context, web: 0.02, mobile: 0.04, tablet: 0.03)
-/// fontSize: sp(context, ios: 3, android: 4, web: 2) // Formato tradicional
-/// ```
-double sp(
-  BuildContext context, {
-  num? web,
-  num? ios,
-  num? android,
-  num? mobile,
-  num? tablet,
-  num? desktop,
-  num? fallback,
-}) {
-  final screenInfo = ScreenScalerInheritedWidget.of(context)?.info;
-  if (screenInfo == null) {
-    throw FlutterError.fromParts([
-      ErrorSummary('ScreenScale Error: Missing ScreenSizeInitializer.'),
-      ErrorDescription(
-        'Debes envolver tu aplicación con ScreenSizeInitializer para usar sp().'
-      ),
-    ]);
-  }
-  
-  final values = <DeviceType, num>{};
-  if (web != null) values[DeviceType.web] = web;
-  if (ios != null) values[DeviceType.ios] = ios;
-  if (android != null) values[DeviceType.android] = android;
-  if (mobile != null) values[DeviceType.mobile] = mobile;
-  if (tablet != null) values[DeviceType.tablet] = tablet;
-  if (desktop != null) values[DeviceType.desktop] = desktop;
-  
-  final rawValue = _getValueForDevice(screenInfo, values, fallback);
-  
-  // Aplicar la misma lógica de escalado que en la extensión
-  final double baseSize;
-  if (rawValue <= 1) {
-    // Si es decimal (0-1), multiplicamos directamente por el ancho
-    baseSize = screenInfo.width * rawValue;
-  } else {
-    // Si es porcentaje (0-100), usamos la lógica original
-    baseSize = screenInfo.width * (rawValue / 100);
-  }
-  
-  return baseSize * screenInfo.textScale;
+  return _normalizeMultiValue(fallback);
 }
