@@ -1,5 +1,42 @@
 # Changelog
 
+## [2.0.0] - 2024-12-28
+
+### 🎉 Added
+- **Nueva API sin context**: Ahora todas las extensiones funcionan sin necesidad de pasar `BuildContext`
+  - `.w` - Ancho responsive (antes `.w(context)`)
+  - `.h` - Alto responsive (antes `.h(context)`)
+  - `.sp` - Tamaño de fuente responsive (antes `.sp(context)`)
+  - `.size` - Tamaño para iconos/padding (antes `.size(context)`)
+  - `.radius` - Border radius responsive (antes `.radius(context)`)
+  - `.flexValue` - Valores flex adaptativos (antes `.flexValue(context)`)
+
+- **ScreenInfoManager singleton**: Gestor global que mantiene el `ScreenInfo` accesible sin context
+- **MIGRATION_GUIDE.md**: Guía completa de migración de v1.x a v2.0.0
+
+### ⚠️ Deprecated
+- Métodos con context renombrados con sufijo `WithContext` (serán eliminados en v3.0.0):
+  - `.wWithContext(context, ...)` - Usar `.w` en su lugar
+  - `.hWithContext(context, ...)` - Usar `.h` en su lugar
+  - `.spWithContext(context, ...)` - Usar `.sp` en su lugar
+  - `.sizeWithContext(context, ...)` - Usar `.size` en su lugar
+  - `.radiusWithContext(context, ...)` - Usar `.radius` en su lugar
+  - `.flexValueWithContext(context, ...)` - Usar `.flexValue` en su lugar
+
+### 🔄 Changed
+- La API con parámetros multi-plataforma ahora solo está disponible a través de los métodos `WithContext` (deprecated)
+- `ScreenSizeInitializer` ahora actualiza automáticamente el singleton `ScreenInfoManager`
+
+### 📖 Documentation
+- README.md actualizado con ejemplos de la nueva API
+- Ejemplos en example_usage.dart migrados a la nueva API
+- Documentación completa de migración en MIGRATION_GUIDE.md
+
+### 🔧 Technical
+- Sin breaking changes en funcionalidad - código anterior sigue funcionando con warnings
+- Mejor rendimiento al eliminar la necesidad de acceso al context en cada llamada
+- Mantiene compatibilidad hacia atrás con métodos deprecated
+
 ## [1.5.1] - 2024-12-19
 ### Fixed
 - **CRITICAL FIX**: Factor de conversión en `.size()` corregido de 0.025% a 0.1%

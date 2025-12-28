@@ -9,11 +9,35 @@ Una librería agnóstica de alto rendimiento para responsividad en Flutter usand
 
 - 🚀 **Alto rendimiento**: Utiliza `InheritedWidget` para propagación eficiente
 - 📱 **Completamente responsive**: Adapta automáticamente el ancho, alto y tamaño de fuente
-- 🎯 **API unificada**: Extension methods simples (.w(), .h(), .sp()) con soporte multi-plataforma
-- 🌐 **Multi-plataforma**: Valores específicos para web, iOS, Android, tablet, desktop
+- 🎯 **API simplificada v2.0**: ¡Ahora sin necesidad de pasar `context`! (`.w`, `.h`, `.sp`)
+- 🌐 **Multi-plataforma (deprecated)**: Valores específicos disponibles vía métodos `WithContext`
 - ♿ **Accesibilidad**: Respeta la configuración de escala de texto del usuario
 - 🔒 **Type-safe**: Aprovecha el null safety de Dart
 - 📦 **Ligero**: Sin dependencias externas, solo Flutter SDK
+
+## 🔥 Novedades v2.0.0
+
+### Nueva API sin `context`
+
+```dart
+// ❌ Antes (v1.x - deprecated)
+Container(
+  width: 80.w(context),
+  height: 50.h(context),
+  child: Text('Hola', style: TextStyle(fontSize: 3.sp(context))),
+)
+
+// ✅ Ahora (v2.0.0 - recomendado)
+Container(
+  width: 80.w,
+  height: 50.h,
+  child: Text('Hola', style: TextStyle(fontSize: 3.sp)),
+)
+```
+
+**🎉 Más limpio, más simple, más rápido de escribir!**
+
+📖 [Ver guía completa de migración](MIGRATION_GUIDE.md)
 
 ## 🔧 Instalación
 
@@ -23,7 +47,7 @@ Agrega la dependencia a tu `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  leulit_flutter_fullresponsive: ^1.5.0
+  leulit_flutter_fullresponsive: ^2.0.0
 ```
 
 Ejecuta:
@@ -81,9 +105,9 @@ class MyApp extends StatelessWidget {
 }
 ```
 
-### 2. Usando las extensiones
+### 2. Usando las extensiones (Nueva API v2.0)
 
-Una vez configurado, puedes usar las extensiones en cualquier parte de tu aplicación. **API unificada v1.5.0 con soporte multi-plataforma:**
+Una vez configurado, puedes usar las extensiones **sin pasar `context`**:
 
 ```dart
 class HomeScreen extends StatelessWidget {
@@ -91,13 +115,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Uso básico (comportamiento adaptativo automático)
-        width: 80.w(context),        // 80% del ancho de pantalla
-        height: 50.h(context),       // 50% del alto de pantalla
-        
-        // Uso multi-plataforma - valores específicos por dispositivo
-        width: 60.w(context, 
-          web: 40,      // 40% en web
+        // ✨ Nueva API sin context
+        width: 80.w,        // 80% del ancho de pantalla
+        height: 50.h,       // 50% del alto de pantalla
           mobile: 90,   // 90% en móvil
           tablet: 70,   // 70% en tablet
         ),

@@ -7,6 +7,46 @@ import 'domain/screen_info.dart';
 export 'domain/screen_info.dart' show DeviceType;
 
 // -----------------------------------------------------------------------------
+// SINGLETON MANAGER (Para API sin context)
+// -----------------------------------------------------------------------------
+
+/// Gestor singleton que mantiene el ScreenInfo globalmente accesible.
+/// Permite usar las extensiones sin necesidad de pasar el BuildContext.
+/// Se actualiza automáticamente cuando cambia el tamaño de pantalla.
+class ScreenInfoManager {
+  static final ScreenInfoManager _instance = ScreenInfoManager._internal();
+  factory ScreenInfoManager() => _instance;
+  ScreenInfoManager._internal();
+  
+  ScreenInfo? _screenInfo;
+  
+  /// Obtiene el ScreenInfo actual. Lanza un error si no se ha inicializado.
+  ScreenInfo get info {
+    if (_screenInfo == null) {
+      throw FlutterError.fromParts([
+        ErrorSummary('ScreenInfoManager Error: Not initialized.'),
+        ErrorDescription(
+          'Debes envolver tu aplicación con ScreenSizeInitializer antes de usar '
+          'las extensiones sin context (.w, .h, .sp, etc.).'
+        ),
+        ErrorHint(
+          'Ejemplo: ScreenSizeInitializer(child: MaterialApp(...))'
+        )
+      ]);
+    }
+    return _screenInfo!;
+  }
+  
+  /// Actualiza el ScreenInfo. Solo debe ser llamado por ScreenSizeInitializer.
+  void updateInfo(ScreenInfo newInfo) {
+    _screenInfo = newInfo;
+  }
+  
+  /// Verifica si el manager ha sido inicializado.
+  bool get isInitialized => _screenInfo != null;
+}
+
+// -----------------------------------------------------------------------------
 // DEBUG HELPERS
 // -----------------------------------------------------------------------------
 
@@ -82,6 +122,9 @@ class ScreenSizeInitializer extends StatelessWidget {
       deviceType: deviceType,
     );
 
+    // ⚡ ACTUALIZAR SINGLETON para API sin context
+    ScreenInfoManager().updateInfo(screenInfo);
+
     // Devolver el propagador con la información.
     return ScreenScalerInheritedWidget(
       info: screenInfo,
@@ -149,19 +192,27 @@ extension ScreenScale on num {
     return value <= 1 ? value.toDouble() : value.toDouble() / 100;
   }
 
-  /// **Ancho Responsive:** Obtiene el ancho como porcentaje de la pantalla.
-  /// Acepta valores de 0-100 (ej: 80.w(context)) o 0-1 (ej: 0.8.w(context))
-  /// Con soporte multi-plataforma opcional.
+  /// **Ancho Responsive (sin context):** Obtiene el ancho como porcentaje de la pantalla.
+  /// Acepta valores de 0-100 (ej: 80.w) o 0-1 (ej: 0.8.w)
   /// 
   /// Ejemplos:
   /// ```dart
   /// // Uso básico
-  /// width: 80.w(context)  // 80% del ancho
-  /// 
-  /// // Multi-plataforma
-  /// width: 50.w(context, web: 30, mobile: 80, tablet: 60)
+  /// width: 80.w  // 80% del ancho
+  /// width: 0.8.w  // Equivalente usando decimales
   /// ```
-  double w(BuildContext context, {
+  double get w {
+    final screenInfo = ScreenInfoManager().info;
+    final normalizedValue = _normalizeValue(this);
+    return screenInfo.width * normalizedValue;
+  }
+  
+  /// **Ancho Responsive (DEPRECATED):** Usa `.w` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.w` directamente sin pasar context.
+  @Deprecated('Usa .w en su lugar (sin context). Será eliminado en v3.0.0')
+  double wWithContext(BuildContext context, {
     num? web,
     num? ios,
     num? android,
@@ -191,19 +242,27 @@ extension ScreenScale on num {
     return screenInfo.width * normalizedValue;
   }
 
-  /// **Alto Responsive:** Obtiene el alto como porcentaje de la pantalla.
-  /// Acepta valores de 0-100 (ej: 30.h(context)) o 0-1 (ej: 0.3.h(context))
-  /// Con soporte multi-plataforma opcional.
+  /// **Alto Responsive (sin context):** Obtiene el alto como porcentaje de la pantalla.
+  /// Acepta valores de 0-100 (ej: 30.h) o 0-1 (ej: 0.3.h)
   /// 
   /// Ejemplos:
   /// ```dart
   /// // Uso básico
-  /// height: 30.h(context)  // 30% del alto
-  /// 
-  /// // Multi-plataforma
-  /// height: 25.h(context, web: 20, mobile: 35, tablet: 28)
+  /// height: 30.h  // 30% del alto
+  /// height: 0.3.h  // Equivalente usando decimales
   /// ```
-  double h(BuildContext context, {
+  double get h {
+    final screenInfo = ScreenInfoManager().info;
+    final normalizedValue = _normalizeValue(this);
+    return screenInfo.height * normalizedValue;
+  }
+  
+  /// **Alto Responsive (DEPRECATED):** Usa `.h` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.h` directamente sin pasar context.
+  @Deprecated('Usa .h en su lugar (sin context). Será eliminado en v3.0.0')
+  double hWithContext(BuildContext context, {
     num? web,
     num? ios,
     num? android,
@@ -233,20 +292,35 @@ extension ScreenScale on num {
     return screenInfo.height * normalizedValue;
   }
   
-  /// **Tamaño de Fuente Responsive (sp):** Escala la fuente usando un porcentaje
+  /// **Tamaño de Fuente Responsive (sin context):** Escala la fuente usando un porcentaje
   /// del ancho base y aplica el factor de escala de accesibilidad del usuario.
-  /// Acepta valores de 0-100 (ej: 3.sp(context)) o 0-1 (ej: 0.03.sp(context))
-  /// Con soporte multi-plataforma opcional.
+  /// Acepta valores de 0-100 (ej: 3.sp) o 0-1 (ej: 0.03.sp)
   /// 
   /// Ejemplos:
   /// ```dart
   /// // Uso básico
-  /// fontSize: 3.sp(context)  // Fuente responsive
-  /// 
-  /// // Multi-plataforma
-  /// fontSize: 3.sp(context, web: 2.5, mobile: 3.5, tablet: 3.2)
+  /// fontSize: 3.sp  // Fuente responsive
+  /// fontSize: 0.03.sp  // Equivalente usando decimales
   /// ```
-  double sp(BuildContext context, {
+  double get sp {
+    final screenInfo = ScreenInfoManager().info;
+    final double baseSize;
+    if (this <= 1) {
+      // Si es decimal (0-1), multiplicamos directamente por el ancho
+      baseSize = screenInfo.width * this;
+    } else {
+      // Si es porcentaje (0-100), usamos la lógica original
+      baseSize = screenInfo.width * (this / 1000);
+    }
+    return baseSize * screenInfo.textScale;
+  }
+  
+  /// **Tamaño de Fuente Responsive (DEPRECATED):** Usa `.sp` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.sp` directamente sin pasar context.
+  @Deprecated('Usa .sp en su lugar (sin context). Será eliminado en v3.0.0')
+  double spWithContext(BuildContext context, {
     num? web,
     num? ios,
     num? android,
@@ -305,20 +379,26 @@ extension ScreenScale on num {
 /// Optimizada para valores numéricos pequeños como sizes de iconos (16, 24, 32, etc.)
 extension ResponsiveSize on num {
   
-  /// **Tamaño Responsive para Iconos, Padding, Margins:**
-  /// Calcula un tamaño responsive basado en el ancho de pantalla.
-  /// Optimizado para valores pequeños como icon sizes.
-  /// Con soporte multi-plataforma integrado.
+  /// **Tamaño Responsive (sin context):** Calcula un tamaño responsive basado en el ancho de pantalla.
+  /// Optimizado para valores pequeños como icon sizes, padding, margins.
   /// 
   /// Ejemplos:
   /// ```dart
-  /// // Uso básico
-  /// Icon(Icons.star, size: 24.size(context))
-  /// 
-  /// // Multi-plataforma
-  /// Icon(Icons.star, size: 24.size(context, mobile: 20, tablet: 28, desktop: 32))
+  /// Icon(Icons.star, size: 24.size)
+  /// padding: EdgeInsets.all(16.size)
   /// ```
-  double size(BuildContext context, {
+  double get size {
+    final screenInfo = ScreenInfoManager().info;
+    // Factor base: 0.1% del ancho de pantalla por cada unidad
+    return screenInfo.width * (this * 0.1 / 100);
+  }
+  
+  /// **Tamaño Responsive (DEPRECATED):** Usa `.size` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.size` directamente sin pasar context.
+  @Deprecated('Usa .size en su lugar (sin context). Será eliminado en v3.0.0')
+  double sizeWithContext(BuildContext context, {
     num? web,
     num? ios,
     num? android,
@@ -356,19 +436,25 @@ extension ResponsiveSize on num {
 /// Extensión para hacer responsive valores de border radius
 extension ResponsiveRadius on num {
   
-  /// **Border Radius Responsive:**
-  /// Calcula un border radius responsive basado en el tamaño de pantalla.
-  /// Con soporte multi-plataforma integrado.
+  /// **Border Radius Responsive (sin context):** Calcula un border radius responsive.
   /// 
   /// Ejemplos:
   /// ```dart
-  /// // Uso básico
-  /// BorderRadius.circular(12.radius(context))
-  /// 
-  /// // Multi-plataforma
-  /// BorderRadius.circular(12.radius(context, mobile: 8, tablet: 16, desktop: 20))
+  /// BorderRadius.circular(12.radius)
+  /// borderRadius: BorderRadius.circular(8.radius)
   /// ```
-  double radius(BuildContext context, {
+  double get radius {
+    final screenInfo = ScreenInfoManager().info;
+    // Factor base: 1.5% del ancho de pantalla por cada unidad de radius
+    return screenInfo.width * (this * 0.015 / 100);
+  }
+  
+  /// **Border Radius Responsive (DEPRECATED):** Usa `.radius` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.radius` directamente sin pasar context.
+  @Deprecated('Usa .radius en su lugar (sin context). Será eliminado en v3.0.0')
+  double radiusWithContext(BuildContext context, {
     num? web,
     num? ios,
     num? android,
@@ -405,19 +491,33 @@ extension ResponsiveRadius on num {
 /// Extensión para hacer responsive valores de flex en layouts
 extension ResponsiveFlex on int {
   
-  /// **Flex Value Responsive:**
-  /// Ajusta valores de flex basándose en el tipo de dispositivo para mejores layouts.
-  /// Con soporte multi-plataforma integrado.
+  /// **Flex Value Responsive (sin context):** Ajusta valores de flex según el dispositivo.
   /// 
   /// Ejemplos:
   /// ```dart
-  /// // Uso básico (ajuste automático)
-  /// Expanded(flex: 3.flexValue(context), child: widget)
-  /// 
-  /// // Multi-plataforma (valores específicos)
-  /// Expanded(flex: 3.flexValue(context, mobile: 2, tablet: 4, desktop: 5), child: widget)
+  /// Expanded(flex: 3.flexValue, child: widget)
   /// ```
-  int flexValue(BuildContext context, {
+  int get flexValue {
+    final screenInfo = ScreenInfoManager().info;
+    // Ajuste de flex basado en el tipo de dispositivo
+    switch (screenInfo.deviceType) {
+      case DeviceType.mobile:
+        return this; // Mantener valor original en mobile
+      case DeviceType.tablet:
+        return (this * 1.2).round(); // Incrementar ligeramente en tablet
+      case DeviceType.desktop:
+        return (this * 1.5).round(); // Incrementar más en desktop
+      default:
+        return this;
+    }
+  }
+  
+  /// **Flex Value Responsive (DEPRECATED):** Usa `.flexValue` en su lugar (sin context).
+  /// 
+  /// Esta versión con context será eliminada en futuras versiones.
+  /// Migra tu código a usar `.flexValue` directamente sin pasar context.
+  @Deprecated('Usa .flexValue en su lugar (sin context). Será eliminado en v3.0.0')
+  int flexValueWithContext(BuildContext context, {
     int? web,
     int? ios,
     int? android,
