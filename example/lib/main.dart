@@ -95,7 +95,7 @@ class BasicExamplePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle(context, 'Basic Extensions (.w, .h, .sp)'),
-          
+
           // Ejemplo de contenedores con diferentes tamaños
           _buildExampleCard(
             context,
@@ -142,9 +142,9 @@ class BasicExamplePage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           SizedBox(height: 20.size),
-          
+
           _buildExampleCard(
             context,
             title: 'Decimal Format (0-1) - Higher Precision',
@@ -188,9 +188,9 @@ class BasicExamplePage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           SizedBox(height: 20.size),
-          
+
           _buildExampleCard(
             context,
             title: 'Font Scaling with .sp()',
@@ -252,7 +252,8 @@ class BasicExamplePage extends StatelessWidget {
     );
   }
 
-  Widget _buildExampleCard(BuildContext context, {required String title, required Widget child}) {
+  Widget _buildExampleCard(BuildContext context,
+      {required String title, required Widget child}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -292,16 +293,16 @@ class MultiPlatformExamplePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle(context, 'Multi-Platform Functions'),
-          
           _buildExampleCard(
             context,
             title: 'Platform-Specific Widths',
             description: 'Different widths based on device type',
             child: Container(
-              width: 70.wWithContext(context,                 web: 40,      // 40% on web
-                mobile: 90,   // 90% on mobile
-                tablet: 60,   // 60% on tablet
-                desktop: 50,  // 50% on desktop
+              width: rw(
+                web: 40, // 40% on web
+                mobile: 90, // 90% on mobile
+                tablet: 60, // 60% on tablet
+                desktop: 50, // 50% on desktop
               ),
               height: 0.12.h,
               decoration: BoxDecoration(
@@ -314,7 +315,8 @@ class MultiPlatformExamplePage extends StatelessWidget {
                 child: Text(
                   'Adaptive Width Container',
                   style: TextStyle(
-                    fontSize: 3.spWithContext(context,                       web: 2,
+                    fontSize: rsp(
+                      web: 2,
                       mobile: 3.5,
                       tablet: 2.5,
                     ),
@@ -325,9 +327,7 @@ class MultiPlatformExamplePage extends StatelessWidget {
               ),
             ),
           ),
-          
           SizedBox(height: 20.size),
-          
           _buildExampleCard(
             context,
             title: 'Platform-Specific Heights',
@@ -336,19 +336,19 @@ class MultiPlatformExamplePage extends StatelessWidget {
               children: [
                 Expanded(
                   child: Container(
-                    height: 20.hWithContext(context,                       web: 15,
+                    height: rh(
+                      web: 15,
                       mobile: 25,
                       tablet: 18,
                       desktop: 12,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.green[300],
-                      borderRadius: BorderRadius.circular(
-                        8.radiusWithContext(context,                           mobile: 6,
-                          tablet: 10,
-                          desktop: 12,
-                        )
-                      ),
+                      borderRadius: BorderRadius.circular(rradius(
+                        mobile: 6,
+                        tablet: 10,
+                        desktop: 12,
+                      )),
                     ),
                     child: Center(
                       child: Text(
@@ -366,12 +366,13 @@ class MultiPlatformExamplePage extends StatelessWidget {
                 SizedBox(width: 12.size),
                 Expanded(
                   child: Container(
-                    height: 18.hWithContext(context,                       web: 10,
+                    height: rh(
+                      web: 10,
                       mobile: 20,
                       tablet: 15,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange[300], 
+                      color: Colors.orange[300],
                       borderRadius: BorderRadius.circular(8.radius),
                     ),
                     child: Center(
@@ -390,9 +391,7 @@ class MultiPlatformExamplePage extends StatelessWidget {
               ],
             ),
           ),
-          
           SizedBox(height: 20.size),
-          
           _buildDeviceInfo(context),
         ],
       ),
@@ -413,7 +412,8 @@ class MultiPlatformExamplePage extends StatelessWidget {
     );
   }
 
-  Widget _buildExampleCard(BuildContext context, {
+  Widget _buildExampleCard(
+    BuildContext context, {
     required String title,
     required String description,
     required Widget child,
@@ -472,10 +472,14 @@ class MultiPlatformExamplePage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.size),
-            _buildInfoRow(context, 'Screen Width:', '${MediaQuery.of(context).size.width.toStringAsFixed(1)}px'),
-            _buildInfoRow(context, 'Screen Height:', '${MediaQuery.of(context).size.height.toStringAsFixed(1)}px'),
-            _buildInfoRow(context, 'Text Scale:', '${MediaQuery.of(context).textScaler.scale(1).toStringAsFixed(2)}x'),
-            _buildInfoRow(context, 'Platform:', Theme.of(context).platform.name),
+            _buildInfoRow(context, 'Screen Width:',
+                '${MediaQuery.of(context).size.width.toStringAsFixed(1)}px'),
+            _buildInfoRow(context, 'Screen Height:',
+                '${MediaQuery.of(context).size.height.toStringAsFixed(1)}px'),
+            _buildInfoRow(context, 'Text Scale:',
+                '${MediaQuery.of(context).textScaler.scale(1).toStringAsFixed(2)}x'),
+            _buildInfoRow(
+                context, 'Platform:', Theme.of(context).platform.name),
           ],
         ),
       ),
@@ -521,7 +525,7 @@ class SpecializedExtensionsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle(context, 'Specialized Extensions'),
-          
+
           // ResponsiveSize Examples
           _buildExampleCard(
             context,
@@ -532,9 +536,12 @@ class SpecializedExtensionsPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildIconExample(context, Icons.star, 20.size, '20.size()'),
-                    _buildIconExample(context, Icons.favorite, 24.size, '24.size()'),
-                    _buildIconExample(context, Icons.thumb_up, 28.size, '28.size()'),
+                    _buildIconExample(
+                        context, Icons.star, 20.size, '20.size()'),
+                    _buildIconExample(
+                        context, Icons.favorite, 24.size, '24.size()'),
+                    _buildIconExample(
+                        context, Icons.thumb_up, 28.size, '28.size()'),
                   ],
                 ),
                 SizedBox(height: 16.size),
@@ -555,9 +562,9 @@ class SpecializedExtensionsPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           SizedBox(height: 20.size),
-          
+
           // ResponsiveRadius Examples
           _buildExampleCard(
             context,
@@ -602,12 +609,11 @@ class SpecializedExtensionsPage extends StatelessWidget {
                     height: 80.size,
                     decoration: BoxDecoration(
                       color: Colors.orange[200],
-                      borderRadius: BorderRadius.circular(
-                        16.radiusWithContext(context,                           mobile: 12,
-                          tablet: 20,
-                          desktop: 24,
-                        )
-                      ),
+                      borderRadius: BorderRadius.circular(rradius(
+                        mobile: 12,
+                        tablet: 20,
+                        desktop: 24,
+                      )),
                     ),
                     child: Center(
                       child: Text(
@@ -621,9 +627,9 @@ class SpecializedExtensionsPage extends StatelessWidget {
               ],
             ),
           ),
-          
+
           SizedBox(height: 20.size),
-          
+
           // ResponsiveFlex Examples
           _buildExampleCard(
             context,
@@ -698,7 +704,8 @@ class SpecializedExtensionsPage extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      flex: 4.flexValueWithContext(context,                         mobile: 3,
+                      flex: rflexValue(
+                        mobile: 3,
                         tablet: 5,
                         desktop: 6,
                       ),
@@ -722,7 +729,8 @@ class SpecializedExtensionsPage extends StatelessWidget {
                     ),
                     SizedBox(width: 8.size),
                     Expanded(
-                      flex: 2.flexValueWithContext(context,                         mobile: 2,
+                      flex: rflexValue(
+                        mobile: 2,
                         tablet: 2,
                         desktop: 1,
                       ),
@@ -768,7 +776,8 @@ class SpecializedExtensionsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildExampleCard(BuildContext context, {
+  Widget _buildExampleCard(
+    BuildContext context, {
     required String title,
     required String description,
     required Widget child,
@@ -807,7 +816,8 @@ class SpecializedExtensionsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIconExample(BuildContext context, IconData icon, double size, String label) {
+  Widget _buildIconExample(
+      BuildContext context, IconData icon, double size, String label) {
     return Column(
       children: [
         Icon(
@@ -840,22 +850,22 @@ class PracticalExamplePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle(context, 'Practical Example'),
-          
+
           // Header Section
           _buildHeaderSection(context),
-          
+
           SizedBox(height: 20.size),
-          
+
           // Stats Cards
           _buildStatsSection(context),
-          
+
           SizedBox(height: 20.size),
-          
+
           // Action Buttons
           _buildActionSection(context),
-          
+
           SizedBox(height: 20.size),
-          
+
           // List Example
           _buildListSection(context),
         ],
@@ -897,7 +907,8 @@ class PracticalExamplePage extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              flex: 4.flexValueWithContext(context,                 mobile: 3,
+              flex: rflexValue(
+                mobile: 3,
                 tablet: 4,
                 desktop: 5,
               ),
@@ -907,7 +918,8 @@ class PracticalExamplePage extends StatelessWidget {
                   Text(
                     'Welcome Back!',
                     style: TextStyle(
-                      fontSize: 4.spWithContext(context,                         mobile: 4.5,
+                      fontSize: rsp(
+                        mobile: 4.5,
                         tablet: 3.5,
                         desktop: 3,
                       ),
@@ -931,7 +943,8 @@ class PracticalExamplePage extends StatelessWidget {
               flex: 1.flexValue,
               child: Icon(
                 Icons.dashboard,
-                size: 45.sizeWithContext(context,                   mobile: 40,
+                size: rsize(
+                  mobile: 40,
                   tablet: 50,
                   desktop: 60,
                 ),
@@ -949,23 +962,27 @@ class PracticalExamplePage extends StatelessWidget {
       children: [
         Expanded(
           flex: 1.flexValue,
-          child: _buildStatCard(context, '1.2K', 'Users', Icons.people, Colors.green),
+          child: _buildStatCard(
+              context, '1.2K', 'Users', Icons.people, Colors.green),
         ),
         SizedBox(width: 12.size),
         Expanded(
           flex: 1.flexValue,
-          child: _buildStatCard(context, '85%', 'Success', Icons.trending_up, Colors.orange),
+          child: _buildStatCard(
+              context, '85%', 'Success', Icons.trending_up, Colors.orange),
         ),
         SizedBox(width: 12.size),
         Expanded(
           flex: 1.flexValue,
-          child: _buildStatCard(context, '42', 'Projects', Icons.folder, Colors.purple),
+          child: _buildStatCard(
+              context, '42', 'Projects', Icons.folder, Colors.purple),
         ),
       ],
     );
   }
 
-  Widget _buildStatCard(BuildContext context, String value, String label, IconData icon, Color color) {
+  Widget _buildStatCard(BuildContext context, String value, String label,
+      IconData icon, Color color) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -977,7 +994,8 @@ class PracticalExamplePage extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 24.sizeWithContext(context,                 mobile: 20,
+              size: rsize(
+                mobile: 20,
                 tablet: 28,
                 desktop: 32,
               ),
@@ -1010,7 +1028,8 @@ class PracticalExamplePage extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          flex: 2.flexValueWithContext(context,             mobile: 1,
+          flex: rflexValue(
+            mobile: 1,
             tablet: 2,
             desktop: 2,
           ),
@@ -1106,10 +1125,30 @@ class PracticalExamplePage extends StatelessWidget {
 
   Widget _buildListItem(BuildContext context, int index) {
     final List<Map<String, dynamic>> items = [
-      {'icon': Icons.check_circle, 'title': 'Task Completed', 'time': '2 min ago', 'color': Colors.green},
-      {'icon': Icons.upload, 'title': 'File Uploaded', 'time': '5 min ago', 'color': Colors.blue},
-      {'icon': Icons.person_add, 'title': 'New User Joined', 'time': '10 min ago', 'color': Colors.orange},
-      {'icon': Icons.notification_important, 'title': 'System Update', 'time': '1 hour ago', 'color': Colors.red},
+      {
+        'icon': Icons.check_circle,
+        'title': 'Task Completed',
+        'time': '2 min ago',
+        'color': Colors.green
+      },
+      {
+        'icon': Icons.upload,
+        'title': 'File Uploaded',
+        'time': '5 min ago',
+        'color': Colors.blue
+      },
+      {
+        'icon': Icons.person_add,
+        'title': 'New User Joined',
+        'time': '10 min ago',
+        'color': Colors.orange
+      },
+      {
+        'icon': Icons.notification_important,
+        'title': 'System Update',
+        'time': '1 hour ago',
+        'color': Colors.red
+      },
     ];
 
     final item = items[index];

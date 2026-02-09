@@ -7,47 +7,115 @@ Una librería agnóstica de alto rendimiento para responsividad en Flutter usand
 
 ## ✨ Características
 
-- 🚀 **Alto rendimiento**: Utiliza `InheritedWidget` para propagación eficiente
+- 🚀 **Alto rendimiento**: Utiliza `InheritedWidget` y singleton para propagación eficiente
 - 📱 **Completamente responsive**: Adapta automáticamente el ancho, alto y tamaño de fuente
-- 🎯 **API simplificada v2.0**: ¡Ahora sin necesidad de pasar `context`! (`.w`, `.h`, `.sp`)
-- 🌐 **Multi-plataforma (deprecated)**: Valores específicos disponibles vía métodos `WithContext`
+- 🎯 **API dual**: Simple (`.w`, `.h`, `.sp`) y multi-plataforma (`rw()`, `rh()`, `rsp()`)
+- 🌐 **Multi-plataforma**: Valores específicos por dispositivo (web, iOS, Android, tablet, desktop)
+- 🎚️ **Breakpoints personalizables**: Define tus propios puntos de quiebre para tablet y desktop
+- 🔍 **Helpers condicionales**: Métodos de utilidad como `isMobile`, `isTablet`, `when()`, `widthBetween()`
+- 🧩 **Widgets especializados**: `ResponsiveWidget` y `ResponsiveBuilder` para renderizado condicional
 - ♿ **Accesibilidad**: Respeta la configuración de escala de texto del usuario
 - 🔒 **Type-safe**: Aprovecha el null safety de Dart
 - 📦 **Ligero**: Sin dependencias externas, solo Flutter SDK
 
-## 🔥 Novedades v2.0.0
+## 🔥 Novedades v3.0.0
 
-### Nueva API sin `context`
+### 🎯 API Dual: Simple y Multi-plataforma
 
 ```dart
-// ❌ Antes (v1.x - deprecated)
+// ✅ API Simple (sin context) - Para valores únicos
 Container(
-  width: 80.w(context),
-  height: 50.h(context),
-  child: Text('Hola', style: TextStyle(fontSize: 3.sp(context))),
+  width: 80.w,        // 80% del ancho
+  height: 50.h,       // 50% del alto
+  child: Text('Hola', style: TextStyle(fontSize: 3.sp)),
 )
 
-// ✅ Ahora (v2.0.0 - recomendado)
+// ✅ API Multi-plataforma - Para valores específicos por dispositivo
 Container(
-  width: 80.w,
-  height: 50.h,
-  child: Text('Hola', style: TextStyle(fontSize: 3.sp)),
+  width: rw(mobile: 90, tablet: 70, desktop: 50),  // Diferentes valores por plataforma
+  height: rh(mobile: 40, tablet: 30, desktop: 25),
+  child: Text('Hola', style: TextStyle(fontSize: rsp(mobile: 4, tablet: 3))),
 )
 ```
 
-**🎉 Más limpio, más simple, más rápido de escribir!**
+### 🎚️ Breakpoints Personalizables
+
+```dart
+ScreenSizeInitializer(
+  breakpoints: ResponsiveBreakpoints(
+    mobile: 0,      // De 0px en adelante
+    tablet: 600,    // De 600px en adelante
+    desktop: 1200,  // De 1200px en adelante
+  ),
+  child: MaterialApp(...),
+)
+```
+
+### 🔍 Helpers Condicionales
+
+```dart
+// Acceso desde ScreenInfo
+final screenInfo = ScreenInfo.of(context);
+
+if (screenInfo.isMobile) {
+  // Código específico para móvil
+}
+
+// Valores condicionales
+final padding = screenInfo.when<double>(
+  mobile: 16,
+  tablet: 24,
+  desktop: 32,
+);
+
+// Rangos de ancho
+if (screenInfo.widthBetween(300, 600)) {
+  // Código para pantallas entre 300 y 600px
+}
+```
+
+### 🧩 Widgets de Renderizado Condicional
+
+```dart
+// Mostrar/ocultar según dispositivo
+ResponsiveWidget(
+  mobile: MobileLayout(),
+  tablet: TabletLayout(),
+  desktop: DesktopLayout(),
+)
+
+// Builder personalizado con ScreenInfo
+ResponsiveBuilder(
+  builder: (context, screenInfo) {
+    return Container(
+      width: screenInfo.isMobile ? 100.w : 50.w,
+      child: Text('Responsive'),
+    );
+  },
+)
+```
+
+### ⚠️ BREAKING CHANGES
+
+**v3.0.0 elimina todos los métodos `*WithContext` obsoletos:**
+
+```dart
+// ❌ ELIMINADO en v3.0.0
+Container(width: 80.w(context, mobile: 90, tablet: 70))
+
+// ✅ USA AHORA
+Container(width: rw(mobile: 90, tablet: 70, desktop: 80))
+```
 
 📖 [Ver guía completa de migración](MIGRATION_GUIDE.md)
 
 ## 🔧 Instalación
 
-### Desde pub.dev
-
 Agrega la dependencia a tu `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  leulit_flutter_fullresponsive: ^2.0.0
+  leulit_flutter_fullresponsive: ^3.0.0
 ```
 
 Ejecuta:
@@ -56,7 +124,818 @@ Ejecuta:
 flutter pub get
 ```
 
-### Instalación local (para desarrollo)
+## 🚀 Inicio Rápido
+
+### 1. Configuración inicial
+
+Envuelve tu `MaterialApp` o `CupertinoApp` con `ScreenSizeInitializer`:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullresponsive.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ScreenSizeInitializer(
+      // Opcional: Personalizar breakpoints
+      breakpoints: ResponsiveBreakpoints(
+        mobile: 0,      // 0px - 599px
+        tablet: 600,    // 600px - 1199px
+        desktop: 1200,  // 1200px+
+      ),
+      child: MaterialApp(
+        title: 'Mi App Responsive',
+        home: HomeScreen(),
+      ),
+    );
+  }
+}
+```
+
+### 2. API Simple - Valores únicos sin context
+
+Para casos donde necesitas un solo valor responsive:
+
+```dart
+class SimpleExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: 80.w,        // 80% del ancho
+        height: 50.h,       // 50% del alto
+        padding: EdgeInsets.all(16.size),  // Padding responsive
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.radius),  // Esquinas responsive
+        ),
+        child: Text(
+          'Texto responsive',
+          style: TextStyle(fontSize: 3.sp),  // Tamaño de fuente responsive
+        ),
+      ),
+    );
+  }
+}
+```
+
+### 3. API Multi-plataforma - Valores específicos por dispositivo
+
+Para casos donde necesitas valores diferentes según la plataforma:
+
+```dart
+class MultiPlatformExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        // Diferentes anchos por plataforma
+        width: rw(
+          mobile: 90,    // 90% en móvil
+          tablet: 70,    // 70% en tablet
+          desktop: 50,   // 50% en desktop
+        ),
+        
+        // Diferentes alturas por plataforma
+        height: rh(
+          mobile: 40,
+          tablet: 30,
+          ios: 45,       // Específico para iOS
+        ),
+        
+        child: Text(
+          'Multi-platform',
+          style: TextStyle(
+            fontSize: rsp(
+              mobile: 4,
+              tablet: 3,
+              desktop: 2.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 📚 API Reference
+
+### � API Simple (Extension Methods) - Sin context
+
+Perfecta para valores únicos que se adaptan automáticamente al tamaño de pantalla:
+
+#### `.w` - Ancho responsive
+```dart
+Container(width: 80.w)  // 80% del ancho de pantalla
+```
+
+#### `.h` - Alto responsive
+```dart
+Container(height: 50.h)  // 50% del alto de pantalla
+```
+
+#### `.sp` - Tamaño de fuente responsive
+```dart
+Text('Hola', style: TextStyle(fontSize: 3.sp))  // Respeta accesibilidad
+```
+
+#### `.size` - Tamaño para iconos, padding, margins
+```dart
+Icon(Icons.star, size: 24.size)
+Padding(padding: EdgeInsets.all(16.size))
+```
+
+#### `.radius` - Border radius responsive
+```dart
+BorderRadius.circular(12.radius)
+```
+
+#### `.flexValue` - Flex responsive para layouts
+```dart
+Expanded(flex: 2.flexValue, child: ...)
+```
+
+### 🌐 API Multi-plataforma (Funciones) - Con valores específicos
+
+Perfecta cuando necesitas valores diferentes por tipo de dispositivo:
+
+#### `rw()` - Ancho multi-plataforma
+```dart
+Container(
+  width: rw(
+    mobile: 90,    // 90% en móvil
+    tablet: 70,    // 70% en tablet
+    desktop: 50,   // 50% en desktop
+    web: 40,       // 40% en web
+    ios: 95,       // 95% específico para iOS
+    android: 88,   // 88% específico para Android
+  ),
+)
+```
+
+#### `rh()` - Alto multi-plataforma
+```dart
+Container(
+  height: rh(
+    mobile: 40,
+    tablet: 30,
+    desktop: 25,
+  ),
+)
+```
+
+#### `rsp()` - Tamaño de fuente multi-plataforma
+```dart
+Text(
+  'Hola',
+  style: TextStyle(
+    fontSize: rsp(
+      mobile: 4,    // Más grande en móvil
+      tablet: 3,    // Medio en tablet
+      desktop: 2.5, // Más pequeño en desktop
+    ),
+  ),
+)
+```
+
+#### `rsize()` - Tamaño multi-plataforma (iconos, padding, etc.)
+```dart
+Icon(
+  Icons.star,
+  size: rsize(
+    mobile: 20,
+    tablet: 24,
+    desktop: 28,
+  ),
+)
+
+Padding(
+  padding: EdgeInsets.all(
+    rsize(mobile: 12, tablet: 16, desktop: 20),
+  ),
+)
+```
+
+#### `rradius()` - Border radius multi-plataforma
+```dart
+BorderRadius.circular(
+  rradius(
+    mobile: 8,
+    tablet: 12,
+    desktop: 16,
+  ),
+)
+```
+
+#### `rflexValue()` - Flex multi-plataforma
+```dart
+Expanded(
+  flex: rflexValue(
+    mobile: 1,
+    tablet: 2,
+    desktop: 3,
+  ),
+  child: ...,
+)
+```
+
+### 🎚️ Breakpoints Personalizables
+
+Configura tus propios puntos de quiebre:
+
+```dart
+ScreenSizeInitializer(
+  breakpoints: ResponsiveBreakpoints(
+    mobile: 0,      // De 0px en adelante
+    tablet: 768,    // De 768px en adelante (personalizado)
+    desktop: 1440,  // De 1440px en adelante (personalizado)
+  ),
+  child: MaterialApp(...),
+)
+```
+
+### 🔍 Helpers Condicionales en ScreenInfo
+
+Obtén información del dispositivo y pantalla:
+
+```dart
+final screenInfo = ScreenInfo.of(context);
+
+// Propiedades básicas
+final width = screenInfo.width;           // Ancho en px
+final height = screenInfo.height;         // Alto en px
+final deviceType = screenInfo.deviceType; // DeviceType enum
+
+// Helpers booleanos
+if (screenInfo.isMobile) { }    // true si es móvil
+if (screenInfo.isTablet) { }    // true si es tablet
+if (screenInfo.isDesktop) { }   // true si es desktop
+if (screenInfo.isWeb) { }       // true si es web
+if (screenInfo.isIOS) { }       // true si es iOS
+if (screenInfo.isAndroid) { }   // true si es Android
+
+// Valores condicionales según dispositivo
+final padding = screenInfo.when<double>(
+  mobile: 16,
+  tablet: 24,
+  desktop: 32,
+);
+
+// Rangos de ancho
+if (screenInfo.widthBetween(300, 600)) {
+  // Pantalla entre 300px y 600px
+}
+if (screenInfo.widthGreaterThan(1200)) {
+  // Pantalla mayor a 1200px
+}
+if (screenInfo.widthLessThan(600)) {
+  // Pantalla menor a 600px
+}
+```
+
+### 🧩 Widgets Especializados
+
+#### `ResponsiveWidget` - Renderizado condicional por dispositivo
+
+Muestra diferentes widgets según el tipo de dispositivo:
+
+```dart
+ResponsiveWidget(
+  mobile: MobileLayout(),      // Mostrar en móvil
+  tablet: TabletLayout(),      // Mostrar en tablet
+  desktop: DesktopLayout(),    // Mostrar en desktop
+)
+```
+
+#### `ResponsiveBuilder` - Builder con acceso a ScreenInfo
+
+Construye widgets con acceso completo a la información de pantalla:
+
+```dart
+ResponsiveBuilder(
+  builder: (context, screenInfo) {
+    if (screenInfo.isMobile) {
+      return MobileLayout();
+    } else if (screenInfo.isTablet) {
+      return TabletLayout();
+    } else {
+      return DesktopLayout();
+    }
+  },
+)
+```
+
+### 🎯 Orden de Precedencia Multi-plataforma
+
+Cuando usas la API multi-plataforma, los valores se resuelven en este orden:
+
+1. **Plataforma específica**: `ios`, `android`, `web`
+2. **Categoría de dispositivo**: `mobile`, `tablet`, `desktop`
+3. **Valor por defecto**: Primer parámetro nombrado encontrado
+
+Ejemplo:
+```dart
+rw(
+  mobile: 80,   // Para móvil genérico
+  ios: 90,      // Para iOS específicamente
+  tablet: 60,
+  desktop: 50,
+)
+// En iPhone: usa 90 (ios tiene precedencia sobre mobile)
+// En Android: usa 80 (mobile)
+// En Tablet: usa 60 (tablet)
+// En Desktop: usa 50 (desktop)
+```
+## 💡 Ejemplos Avanzados
+
+### Layout Responsive Completo
+
+```dart
+class ResponsiveLayout extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'App Responsive',
+          style: TextStyle(fontSize: 4.sp),
+        ),
+      ),
+      body: ResponsiveBuilder(
+        builder: (context, screenInfo) {
+          if (screenInfo.isMobile) {
+            return _buildMobileLayout();
+          } else if (screenInfo.isTablet) {
+            return _buildTabletLayout();
+          } else {
+            return _buildDesktopLayout();
+          }
+        },
+      ),
+    );
+  }
+  
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        Container(
+          width: 100.w,
+          height: rh(mobile: 30),
+          color: Colors.blue,
+          child: Center(
+            child: Text(
+              'Header Móvil',
+              style: TextStyle(fontSize: 5.sp, color: Colors.white),
+            ),
+          ),
+        ),
+        SizedBox(height: 2.h),
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.all(16.size),
+            children: [
+              _buildCard('Item 1'),
+              _buildCard('Item 2'),
+              _buildCard('Item 3'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildTabletLayout() {
+    return Row(
+      children: [
+        Container(
+          width: rw(tablet: 30),
+          color: Colors.grey[300],
+          child: Center(child: Text('Sidebar', style: TextStyle(fontSize: 3.sp))),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              Container(
+                height: rh(tablet: 20),
+                color: Colors.blue,
+                child: Center(
+                  child: Text('Header', style: TextStyle(fontSize: 5.sp, color: Colors.white)),
+                ),
+              ),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  padding: EdgeInsets.all(16.size),
+                  children: [
+                    _buildCard('Item 1'),
+                    _buildCard('Item 2'),
+                    _buildCard('Item 3'),
+                    _buildCard('Item 4'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        Container(
+          width: rw(desktop: 20),
+          color: Colors.grey[300],
+          child: Center(child: Text('Sidebar', style: TextStyle(fontSize: 3.sp))),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              Container(
+                height: rh(desktop: 15),
+                color: Colors.blue,
+                child: Center(
+                  child: Text('Header', style: TextStyle(fontSize: 5.sp, color: Colors.white)),
+                ),
+              ),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  padding: EdgeInsets.all(rsize(desktop: 24)),
+                  children: List.generate(6, (i) => _buildCard('Item ${i + 1}')),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          width: rw(desktop: 20),
+          color: Colors.grey[200],
+          child: Center(child: Text('Panel Derecho', style: TextStyle(fontSize: 3.sp))),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildCard(String title) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.radius),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(16.size),
+        child: Center(
+          child: Text(title, style: TextStyle(fontSize: 3.sp)),
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Usando Breakpoints Personalizados
+
+```dart
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ScreenSizeInitializer(
+      // Breakpoints personalizados según diseño
+      breakpoints: ResponsiveBreakpoints(
+        mobile: 0,      // 0 - 767px
+        tablet: 768,    // 768 - 1439px
+        desktop: 1440,  // 1440px+
+      ),
+      child: MaterialApp(
+        home: CustomBreakpointsExample(),
+      ),
+    );
+  }
+}
+
+class CustomBreakpointsExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenInfo = ScreenInfo.of(context);
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Breakpoints Personalizados'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Ancho: ${screenInfo.width.toStringAsFixed(0)}px',
+              style: TextStyle(fontSize: 3.sp),
+            ),
+            SizedBox(height: 2.h),
+            Text(
+              'Tipo: ${screenInfo.deviceType}',
+              style: TextStyle(fontSize: 3.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 4.h),
+            Container(
+              width: rw(mobile: 90, tablet: 70, desktop: 50),
+              height: rh(mobile: 30, tablet: 25, desktop: 20),
+              decoration: BoxDecoration(
+                color: screenInfo.when<Color>(
+                  mobile: Colors.blue,
+                  tablet: Colors.green,
+                  desktop: Colors.purple,
+                ),
+                borderRadius: BorderRadius.circular(
+                  rradius(mobile: 8, tablet: 12, desktop: 16),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  screenInfo.when<String>(
+                    mobile: 'Vista Móvil',
+                    tablet: 'Vista Tablet',
+                    desktop: 'Vista Desktop',
+                  ),
+                  style: TextStyle(
+                    fontSize: rsp(mobile: 4, tablet: 3.5, desktop: 3),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+```
+
+### Card Responsive con Múltiples Plataformas
+
+```dart
+class ResponsiveCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final IconData icon;
+  
+  const ResponsiveCard({
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    final screenInfo = ScreenInfo.of(context);
+    
+    return Card(
+      elevation: screenInfo.when<double>(
+        mobile: 2,
+        tablet: 4,
+        desktop: 6,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          rradius(mobile: 8, tablet: 12, desktop: 16),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(
+          rsize(mobile: 16, tablet: 20, desktop: 24),
+        ),
+        child: screenInfo.isMobile
+            ? _buildMobileLayout()
+            : _buildTabletDesktopLayout(),
+      ),
+    );
+  }
+  
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: rsize(mobile: 40),
+          color: Colors.blue,
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: rsp(mobile: 4),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 1.h),
+        Text(
+          description,
+          style: TextStyle(fontSize: rsp(mobile: 3)),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildTabletDesktopLayout() {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: rsize(tablet: 48, desktop: 56),
+          color: Colors.blue,
+        ),
+        SizedBox(width: rsize(tablet: 16, desktop: 24)),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: rsp(tablet: 3.5, desktop: 3),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 1.h),
+              Text(
+                description,
+                style: TextStyle(fontSize: rsp(tablet: 2.8, desktop: 2.5)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+```
+
+### Form Responsive Multi-plataforma
+
+```dart
+class ResponsiveForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveBuilder(
+      builder: (context, screenInfo) {
+        return Padding(
+          padding: EdgeInsets.all(
+            rsize(mobile: 16, tablet: 24, desktop: 32),
+          ),
+          child: Column(
+            children: [
+              _buildTextField(
+                label: 'Nombre',
+                icon: Icons.person,
+              ),
+              SizedBox(height: rsize(mobile: 12, tablet: 16, desktop: 20)),
+              _buildTextField(
+                label: 'Email',
+                icon: Icons.email,
+              ),
+              SizedBox(height: rsize(mobile: 12, tablet: 16, desktop: 20)),
+              _buildTextField(
+                label: 'Contraseña',
+                icon: Icons.lock,
+                obscureText: true,
+              ),
+              SizedBox(height: rsize(mobile: 24, tablet: 32, desktop: 40)),
+              SizedBox(
+                width: rw(mobile: 100, tablet: 50, desktop: 30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                      vertical: rsize(mobile: 14, tablet: 16, desktop: 18),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        rradius(mobile: 8, tablet: 10, desktop: 12),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: Text(
+                    'Enviar',
+                    style: TextStyle(
+                      fontSize: rsp(mobile: 3.5, tablet: 3, desktop: 2.8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildTextField({
+    required String label,
+    required IconData icon,
+    bool obscureText = false,
+  }) {
+    return TextField(
+      obscureText: obscureText,
+      style: TextStyle(fontSize: rsp(mobile: 3.5, tablet: 3, desktop: 2.8)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(fontSize: rsp(mobile: 3, tablet: 2.8, desktop: 2.5)),
+        prefixIcon: Icon(
+          icon,
+          size: rsize(mobile: 20, tablet: 22, desktop: 24),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(
+            rradius(mobile: 8, tablet: 10, desktop: 12),
+          ),
+        ),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: rsize(mobile: 16, tablet: 18, desktop: 20),
+          vertical: rsize(mobile: 14, tablet: 16, desktop: 18),
+        ),
+      ),
+    );
+  }
+}
+```
+
+## 🧪 Testing
+
+Para ejecutar las pruebas:
+
+```bash
+flutter test
+```
+
+## ⚠️ Troubleshooting
+
+### Error: "Missing ScreenSizeInitializer"
+
+**Problema:** Las extensiones lanzan error sobre inicializador faltante.
+
+**Solución:** Asegúrate de envolver tu `MaterialApp` con `ScreenSizeInitializer`:
+
+```dart
+ScreenSizeInitializer(
+  child: MaterialApp(...),
+)
+```
+
+### Comportamiento inesperado en multi-plataforma
+
+**Problema:** Los valores multi-plataforma no se aplican correctamente.
+
+**Solución:** Verifica el orden de precedencia:
+1. Plataforma específica (`ios`, `android`, `web`)
+2. Categoría (`mobile`, `tablet`, `desktop`)
+
+```dart
+// Correcto: iOS tendrá 95, Android 85
+rw(mobile: 80, ios: 95, android: 85)
+
+// El valor mobile no se aplica si hay ios/android específico
+```
+
+### Las extensiones simples (.w, .h, .sp) no se adaptan a plataforma
+
+**Problema:** Esperaba valores diferentes por plataforma usando `.w`, `.h`, `.sp`.
+
+**Solución:** Las extensiones simples son para valores únicos. Usa las funciones multi-plataforma:
+
+```dart
+// ❌ Esto no funcionará
+Container(width: 80.w)  // Siempre será 80%
+
+// ✅ Para valores específicos por plataforma
+Container(width: rw(mobile: 90, tablet: 70, desktop: 50))
+```
+
+## 📦 Desarrollo Local
+
+### Estructura del proyecto
+
+```
+lib/
+├── leulit_flutter_fullresponsive.dart    # API principal
+├── core/
+│   └── screen_scaler_inherited_widget.dart # InheritedWidget
+└── domain/
+    └── screen_info.dart                  # Modelo y helpers
+```
+
+### Instalación local
 
 Si quieres usar la versión local del paquete:
 
@@ -78,707 +957,6 @@ dependencies:
 flutter pub get
 ```
 
-## 🚀 Uso Básico
-
-### 1. Configuración inicial
-
-Envuelve tu `MaterialApp` o `CupertinoApp` con `ScreenSizeInitializer`:
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullresponsive.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ScreenSizeInitializer(
-      child: MaterialApp(
-        title: 'Mi App Responsive',
-        home: HomeScreen(),
-      ),
-    );
-  }
-}
-```
-
-### 2. Usando las extensiones (Nueva API v2.0)
-
-Una vez configurado, puedes usar las extensiones **sin pasar `context`**:
-
-```dart
-class HomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        // ✨ Nueva API sin context
-        width: 80.w,        // 80% del ancho de pantalla
-        height: 50.h,       // 50% del alto de pantalla
-          mobile: 90,   // 90% en móvil
-          tablet: 70,   // 70% en tablet
-        ),
-        
-        // Formato decimal para mayor precisión
-        width: 0.8.w(context, web: 0.4, mobile: 0.9),
-        
-        child: Text(
-          'Texto responsive',
-          style: TextStyle(
-            // Tamaño básico
-            fontSize: 4.sp(context),
-            
-            // Con valores específicos por plataforma
-            fontSize: 3.sp(context,
-              web: 2.5,
-              mobile: 4,
-              tablet: 3.5,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 📚 API Reference
-
-### 🚀 Extension Methods Unificados (v1.5.0)
-
-#### `.w(BuildContext context, {...})`
-Calcula un porcentaje del ancho de pantalla con soporte multi-plataforma:
-```dart
-// Uso básico
-Container(width: 50.w(context))     // 50% del ancho
-
-// Con valores específicos por plataforma
-Container(width: 60.w(context,
-  web: 40,        // 40% en web
-  mobile: 80,     // 80% en móvil (iOS + Android)
-  tablet: 65,     // 65% en tablet
-  ios: 85,        // 85% específico para iOS
-  android: 75,    // 75% específico para Android
-  desktop: 35,    // 35% en aplicaciones desktop
-))
-
-// Formato decimal para mayor precisión
-Container(width: 0.5.w(context, web: 0.4, mobile: 0.8))
-```
-
-#### `.h(BuildContext context, {...})`
-Calcula un porcentaje del alto de pantalla con soporte multi-plataforma:
-```dart
-// Uso básico
-Container(height: 30.h(context))    // 30% del alto
-
-// Con valores específicos por plataforma
-Container(height: 25.h(context,
-  web: 20,
-  mobile: 35,
-  tablet: 28,
-))
-
-// Formato decimal
-Container(height: 0.3.h(context, web: 0.2, tablet: 0.35))
-```
-
-#### `.sp(BuildContext context, {...})`
-Calcula un tamaño de fuente responsive que respeta la configuración de accesibilidad:
-```dart
-// Uso básico
-Text('Hola', style: TextStyle(fontSize: 3.sp(context)))
-
-// Con valores específicos por plataforma
-Text('Hola', style: TextStyle(
-  fontSize: 3.sp(context,
-    web: 2.5,
-    mobile: 4,
-    tablet: 3.5,
-  )
-))
-
-// Formato decimal para mayor control
-Text('Hola', style: TextStyle(
-  fontSize: 0.025.sp(context, web: 0.02, mobile: 0.03)
-))
-```
-
-### Widgets
-
-#### `ScreenSizeInitializer`
-Widget que debe envolver tu aplicación para inicializar el sistema de responsividad.
-
-```dart
-ScreenSizeInitializer(
-  child: MaterialApp(...),
-)
-```
-
-## 💡 Ejemplos Avanzados
-
-### Comparación de formatos
-
-```dart
-class FormatComparison extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Formato tradicional (0-100)
-        Container(
-          width: 75.w(context),        // 75%
-          height: 10.h(context),       // 10%
-          color: Colors.blue,
-        ),
-        
-        // Formato decimal (0-1) - Equivalente
-        Container(
-          width: 0.75.w(context),      // 75%
-          height: 0.1.h(context),      // 10%
-          color: Colors.green,
-        ),
-        
-        // Alta precisión solo posible con decimales
-        Container(
-          width: 0.618033.w(context),  // Proporción áurea exacta
-          height: 0.08333.h(context),  // 1/12 exacto
-          color: Colors.orange,
-        ),
-      ],
-    );
-  }
-}
-```
-
-### 🌐 Plataformas Soportadas
-
-La API unificada detecta automáticamente la plataforma y aplica los valores apropiados:
-
-- **`web`**: Aplicaciones web
-- **`ios`**: Específico para iOS
-- **`android`**: Específico para Android  
-- **`mobile`**: Ambos iOS y Android (precedencia menor que ios/android específicos)
-- **`tablet`**: Tablets (detectado por tamaño de pantalla ≥600px)
-- **`desktop`**: Aplicaciones de escritorio
-
-#### Orden de precedencia:
-1. Plataforma específica (`ios`, `android`, `web`)
-2. Categoría (`mobile`, `tablet`, `desktop`)
-3. Valor base (primer parámetro)
-
-```dart
-class MultiPlatformExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // Diferentes anchos según la plataforma
-      width: 50.w(context, 
-        web: 30,      // 30% en web
-        mobile: 90,   // 90% en móviles (iOS y Android)
-        tablet: 60,   // 60% en tablets
-      ),
-      
-      // Diferentes alturas según la plataforma
-      height: 40.h(context,
-        web: 35,       // 35% en web
-        ios: 45,       // 45% específico para iOS
-        android: 42,   // 42% específico para Android
-        tablet: 38,    // 38% en tablets
-      ),
-      
-      child: Text(
-        'Responsive Multi-Platform',
-        style: TextStyle(
-          // Diferentes tamaños de fuente según la plataforma
-          fontSize: 3.sp(context,
-            web: 2.5,    // Tamaño para web
-            mobile: 4,   // Tamaño para móviles
-            tablet: 3.5, // Tamaño para tablets
-          ),
-        ),
-      ),
-    );
-  }
-}
-```
-
-### Layout responsive completo
-
-```dart
-class ResponsiveLayout extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'App Responsive',
-          style: TextStyle(fontSize: 4.sp(context)),
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(5.w(context)),
-        child: Column(
-          children: [
-            Container(
-              width: 100.w(context),
-              height: 25.h(context),
-              color: Colors.blue,
-              child: Center(
-                child: Text(
-                  'Header',
-                  style: TextStyle(
-                    fontSize: 5.sp(context),
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 2.h(context)),
-            Expanded(
-              child: Row(
-                children: [
-                  Container(
-                    width: 30.w(context),
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text(
-                        'Sidebar',
-                        style: TextStyle(fontSize: 3.sp(context)),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 2.w(context)),
-                  Expanded(
-                    child: Container(
-                      color: Colors.grey[100],
-                      child: Center(
-                        child: Text(
-                          'Content',
-                          style: TextStyle(fontSize: 3.sp(context)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 🎨 Extensiones Especializadas
-
-### 📏 ResponsiveSize - Para Iconos, Padding, Margins
-
-Optimiza tamaños de iconos, padding, margins y otros elementos UI pequeños:
-
-```dart
-class IconExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Iconos responsive básicos
-        Icon(
-          Icons.star,
-          size: 24.size(context), // Tamaño responsive automático
-          color: Colors.gold,
-        ),
-        
-        // Con valores específicos por plataforma
-        Icon(
-          Icons.favorite,
-          size: 20.size(context,
-            mobile: 18,   // Más pequeño en móviles
-            tablet: 24,   // Medio en tablets
-            desktop: 32,  // Más grande en desktop
-          ),
-          color: Colors.red,
-        ),
-        
-        // Padding responsive
-        Padding(
-          padding: EdgeInsets.all(16.size(context)),
-          child: Text('Padding responsive'),
-        ),
-        
-        // Margins responsive con plataformas específicas
-        Container(
-          margin: EdgeInsets.symmetric(
-            horizontal: 20.size(context, web: 30, mobile: 15),
-            vertical: 12.size(context, tablet: 16),
-          ),
-          child: Text('Margin responsive'),
-        ),
-      ],
-    );
-  }
-}
-```
-
-### 🔄 ResponsiveRadius - Para Border Radius
-
-Crea esquinas redondeadas que se adapten perfectamente a diferentes pantallas:
-
-```dart
-class RadiusExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Border radius simple
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(12.radius(context)),
-          ),
-          child: Text('Esquinas responsive'),
-        ),
-        
-        // Border radius específico por plataforma
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.green,
-            borderRadius: BorderRadius.circular(
-              8.radius(context,
-                mobile: 6,    // Esquinas más suaves en móvil
-                tablet: 12,   // Intermedias en tablet
-                desktop: 20,  // Más pronunciadas en desktop
-              ),
-            ),
-          ),
-          child: Text('Multi-platform radius'),
-        ),
-        
-        // Diferentes esquinas
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.purple,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16.radius(context)),
-              topRight: Radius.circular(8.radius(context, web: 12)),
-              bottomLeft: Radius.circular(4.radius(context)),
-              bottomRight: Radius.circular(20.radius(context, mobile: 16)),
-            ),
-          ),
-          child: Text('Esquinas asimétricas'),
-        ),
-      ],
-    );
-  }
-}
-```
-
-### 📐 ResponsiveFlex - Para Layouts Flexibles
-
-Optimiza tus layouts con valores de flex que se adapten al tipo de dispositivo:
-
-```dart
-class FlexExample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Row con flex responsive automático
-        Row(
-          children: [
-            Expanded(
-              flex: 3.flexValue(context), // Se ajusta automáticamente
-              child: Container(
-                color: Colors.red,
-                height: 100,
-                child: Center(child: Text('Flex 3')),
-              ),
-            ),
-            Expanded(
-              flex: 2.flexValue(context), // Se ajusta automáticamente  
-              child: Container(
-                color: Colors.blue,
-                height: 100,
-                child: Center(child: Text('Flex 2')),
-              ),
-            ),
-          ],
-        ),
-        
-        SizedBox(height: 20),
-        
-        // Row con flex específico por plataforma
-        Row(
-          children: [
-            Expanded(
-              flex: 4.flexValue(context,
-                mobile: 3,    // Más equilibrado en móvil
-                tablet: 5,    // Más prominente en tablet
-                desktop: 6,   // Dominante en desktop
-              ),
-              child: Container(
-                color: Colors.green,
-                height: 100,
-                child: Center(child: Text('Flex Adaptativo')),
-              ),
-            ),
-            Expanded(
-              flex: 2.flexValue(context,
-                mobile: 2,
-                tablet: 2,
-                desktop: 1,   // Menos espacio en desktop
-              ),
-              child: Container(
-                color: Colors.orange,
-                height: 100,
-                child: Center(child: Text('Flex Secundario')),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-```
-
-### 🎯 Casos de Uso Prácticos
-
-```dart
-class PracticalExamples extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: Icon(
-          Icons.menu,
-          size: 24.sizeFor(context, mobile: 20, tablet: 28),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.search,
-              size: 22.size(context),
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.more_vert,
-              size: 22.size(context),
-            ),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.size(context)),
-        child: Column(
-          children: [
-            // Card con esquinas y padding responsive
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.radius(context)),
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(20.size(context)),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.notifications,
-                      size: 28.sizeFor(context,
-                        mobile: 24,
-                        tablet: 32,
-                        desktop: 36,
-                      ),
-                      color: Colors.blue,
-                    ),
-                    SizedBox(width: 16.size(context)),
-                    Expanded(
-                      flex: 4.flexValue(context),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Notificación',
-                            style: TextStyle(
-                              fontSize: 3.sp(context),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Descripción de la notificación',
-                            style: TextStyle(fontSize: 2.5.sp(context)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            
-            SizedBox(height: 20.size(context)),
-            
-            // Botones con diferentes estilos responsive
-            Row(
-              children: [
-                Expanded(
-                  flex: 2.flexFor(context, mobile: 1, tablet: 2),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.radius(context)),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12.size(context),
-                        horizontal: 24.size(context),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      'Aceptar',
-                      style: TextStyle(fontSize: 2.8.sp(context)),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.size(context)),
-                Expanded(
-                  flex: 1.flexValue(context),
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.radius(context)),
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        vertical: 12.size(context),
-                        horizontal: 16.size(context),
-                      ),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      'Cancelar',
-                      style: TextStyle(fontSize: 2.8.sp(context)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-```
-
-## 🧪 Testing
-
-Para ejecutar las pruebas:
-
-```bash
-flutter test
-```
-
-## 📦 Desarrollo Local
-
-### Estructura del proyecto
-
-```
-lib/
-├── leulit_flutter_fullresponsive.dart    # Archivo principal
-├── core/
-│   └── screen_scaler_inherited_widget.dart # InheritedWidget
-└── domain/
-    └── screen_info.dart                  # Modelo de datos
-```
-
-### Ejecutar ejemplo de desarrollo
-
-```bash
-flutter create example
-cd example
-# Agregar dependencia local en pubspec.yaml
-flutter run
-```
-
-## 📋 Publicación en pub.dev
-
-### Requisitos previos
-
-1. Tener una cuenta en [pub.dev](https://pub.dev)
-2. Configurar las credenciales:
-```bash
-dart pub login
-```
-
-### Proceso de publicación
-
-1. **Verificar que el paquete esté listo:**
-```bash
-dart pub publish --dry-run
-```
-
-2. **Actualizar la versión en `pubspec.yaml`:**
-```yaml
-version: 1.0.1  # Incrementar según semantic versioning
-```
-
-3. **Actualizar el CHANGELOG.md:**
-```markdown
-## [1.0.1] - 2024-10-14
-### Added
-- Nueva funcionalidad X
-### Fixed
-- Corrección del bug Y
-```
-
-4. **Publicar:**
-```bash
-dart pub publish
-```
-
-### Semantic Versioning
-
-- **MAJOR** (1.0.0 → 2.0.0): Cambios que rompen compatibilidad
-- **MINOR** (1.0.0 → 1.1.0): Nuevas funcionalidades compatibles
-- **PATCH** (1.0.0 → 1.0.1): Correcciones de bugs
-
-### Actualización de versiones
-
-1. Hacer cambios en el código
-2. Ejecutar pruebas: `flutter test`
-3. Actualizar versión en `pubspec.yaml`
-4. Actualizar `CHANGELOG.md`
-5. Commit y push a git
-6. Publicar: `dart pub publish`
-
-## ⚠️ Troubleshooting
-
-### Error: "Missing ScreenSizeInitializer"
-
-**Problema:** Las extensiones lanzan error sobre inicializador faltante.
-
-**Solución:** Asegúrate de envolver tu `MaterialApp` con `ScreenSizeInitializer`:
-
-```dart
-ScreenSizeInitializer(
-  child: MaterialApp(...),
-)
-```
-
-### Comportamiento inesperado en tamaños
-
-**Problema:** Los porcentajes no se comportan como esperado.
-
-**Solución:** Verifica que estés usando los valores correctos:
-- `.w()` y `.h()` esperan valores 0-100 (porcentajes)
-- `.sp()` funciona mejor con valores pequeños (1-6 típicamente)
-
 ## 🤝 Contribuciones
 
 Las contribuciones son bienvenidas. Por favor:
@@ -789,6 +967,12 @@ Las contribuciones son bienvenidas. Por favor:
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Crea un Pull Request
 
+## 📖 Documentación Adicional
+
+- [CHANGELOG.md](CHANGELOG.md) - Historial de cambios
+- [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) - Guía de migración desde v2.x
+- [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md) - Ejemplos exhaustivos de uso
+
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
@@ -797,8 +981,13 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 Desarrollado por [Leulit](https://github.com/leulit)
 
-## 🔗 Enlaces
+## 🔗 Enlaces Útiles
 
+- [pub.dev](https://pub.dev/packages/leulit_flutter_fullresponsive)
+- [GitHub Repository](https://github.com/leulit/leulit_flutter_fullresponsive)
 - [Documentación de Flutter](https://flutter.dev/docs)
-- [pub.dev](https://pub.dev)
 - [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
+
+---
+
+**¡Disfruta construyendo aplicaciones responsive! 🚀**

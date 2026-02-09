@@ -1,5 +1,80 @@
 # Changelog
 
+## [3.0.0] - 2026-02-06
+
+### 🎉 Added - API Multi-Plataforma Moderna
+- **Funciones multi-plataforma sin context**: Nueva familia de funciones `rw()`, `rh()`, `rsp()`, etc.
+  - `rw()` - Ancho con variaciones por plataforma
+  - `rh()` - Alto con variaciones por plataforma
+  - `rsp()` - Font size con variaciones por plataforma
+  - `rsize()` - Tamaños (padding, icons) con variaciones
+  - `rradius()` - Border radius con variaciones
+  - `rflexValue()` - Flex values con variaciones
+
+- **Breakpoints personalizados**: Configura tus propios puntos de quiebre
+  - `ResponsiveBreakpoints` con valores custom
+  - Breakpoints configurables en `ScreenSizeInitializer`
+  - DeviceType calculado basado en breakpoints custom
+
+- **Helpers condicionales en ScreenInfo** (sin context):
+  - `.isMobile`, `.isTablet`, `.isDesktop`
+  - `.isMobileIOS`, `.isMobileAndroid`
+  - `.isTabletOrDesktop`
+  - `.isPortrait`, `.isLandscape`
+  - `.widthBetween()`, `.heightBetween()`
+  - `.when<T>()` - Método para valores condicionales
+
+- **Widgets Responsivos**:
+  - `ResponsiveWidget` - Renderiza diferentes widgets por dispositivo
+  - `ResponsiveBuilder` - Builder con acceso a ScreenInfo para lógica compleja
+
+- **Documentación completa**:
+  - `USAGE_EXAMPLES.md` con ejemplos exhaustivos
+  - Guías de uso para todos los casos
+
+### ⚠️ BREAKING CHANGES
+- **Eliminados todos los métodos deprecated `*WithContext`**
+  - `.wWithContext()`, `.hWithContext()`, `.spWithContext()` - ELIMINADOS
+  - `.sizeWithContext()`, `.radiusWithContext()`, `.flexValueWithContext()` - ELIMINADOS
+  - Usar API simple (`.w`, `.h`, `.sp`) o nueva API multi-plataforma (`rw()`, `rh()`, etc.)
+
+- **Nueva jerarquía de fallbacks**:
+  - iOS: `ios` → `mobile` → `tablet` → `desktop`
+  - Android: `android` → `mobile` → `tablet` → `desktop`
+  - Tablet: `tablet` → `mobile` → `desktop`
+  - Web: `web` → `desktop` → `tablet` → `mobile`
+
+### 🔄 Changed
+- **ScreenSizeInitializer** ahora acepta `ResponsiveBreakpoints` opcionales
+- **Cálculo de DeviceType** mejorado basado en breakpoints personalizados
+- **Optimización de rendimiento** en helpers de fallback
+
+### 📖 Documentation
+- README.md completamente renovado con nueva API
+- USAGE_EXAMPLES.md con casos de uso reales
+- Ejemplos de layouts adaptativos, formularios, grids, etc.
+
+### 🔧 Migration from v2.x
+```dart
+// ❌ v2.x (deprecated - ya no funciona)
+Container(
+  width: 80.wWithContext(context, tablet: 60, desktop: 50),
+  height: 30.hWithContext(context, tablet: 25),
+)
+
+// ✅ v3.0 - API simple (sin variaciones)
+Container(
+  width: 80.w,
+  height: 30.h,
+)
+
+// ✅ v3.0 - API multi-plataforma (con variaciones)
+Container(
+  width: rw(mobile: 90, tablet: 70, desktop: 50),
+  height: rh(mobile: 40, tablet: 30, desktop: 25),
+)
+```
+
 ## [2.0.0] - 2024-12-28
 
 ### 🎉 Added

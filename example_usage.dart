@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:leulit_flutter_fullresponsive/leulit_flutter_fullreponsive.dart';
 
-
 /// Ejemplo completo mostrando la nueva API sin context (v2.0.0):
 /// - ✨ NUEVA API: Usa .w, .h, .sp sin pasar context
 /// - ⚠️ API ANTIGUA (deprecated): .w, .h, .sp
-/// 
+///
 /// Características:
 /// - ResponsiveSize para iconos, padding, margins
 /// - ResponsiveRadius para esquinas redondeadas
@@ -69,21 +68,21 @@ class ResponsiveDemo extends StatelessWidget {
             // Sección: Iconos Responsive
             _buildSectionTitle(context, '📏 Iconos Responsive'),
             _buildIconSection(context),
-            
+
             SizedBox(height: 24.size), // ✨ Nueva API sin context
-            
+
             // Sección: Border Radius Responsive
             _buildSectionTitle(context, '🔄 Border Radius Responsive'),
             _buildRadiusSection(context),
-            
+
             SizedBox(height: 24.size), // ✨ Nueva API sin context
-            
+
             // Sección: Flex Layouts Responsive
             _buildSectionTitle(context, '📐 Flex Layouts Responsive'),
             _buildFlexSection(context),
-            
+
             SizedBox(height: 24.size), // ✨ Nueva API sin context
-            
+
             // Sección: Ejemplo Práctico Completo
             _buildSectionTitle(context, '🎯 Ejemplo Práctico'),
             _buildPracticalExample(context),
@@ -110,7 +109,8 @@ class ResponsiveDemo extends StatelessWidget {
   Widget _buildIconSection(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.radius), // ✨ Nueva API sin context
+        borderRadius:
+            BorderRadius.circular(12.radius), // ✨ Nueva API sin context
       ),
       child: Padding(
         padding: EdgeInsets.all(16.size), // ✨ Nueva API sin context
@@ -126,7 +126,9 @@ class ResponsiveDemo extends StatelessWidget {
                       size: 32.size, // ✨ Nueva API sin context
                       color: Colors.amber,
                     ),
-                    Text('32.size', style: TextStyle(fontSize: 2.sp)), // ✨ Nueva API sin context
+                    Text('32.size',
+                        style: TextStyle(
+                            fontSize: 2.sp)), // ✨ Nueva API sin context
                   ],
                 ),
                 Column(
@@ -136,7 +138,9 @@ class ResponsiveDemo extends StatelessWidget {
                       size: 28.size, // ✨ Nueva API sin context
                       color: Colors.red,
                     ),
-                    Text('28.size', style: TextStyle(fontSize: 2.sp)), // ✨ Nueva API sin context
+                    Text('28.size',
+                        style: TextStyle(
+                            fontSize: 2.sp)), // ✨ Nueva API sin context
                   ],
                 ),
                 Column(
@@ -146,7 +150,9 @@ class ResponsiveDemo extends StatelessWidget {
                       size: 24.size, // ✨ Nueva API sin context
                       color: Colors.green,
                     ),
-                    Text('24.size', style: TextStyle(fontSize: 2.sp)), // ✨ Nueva API sin context
+                    Text('24.size',
+                        style: TextStyle(
+                            fontSize: 2.sp)), // ✨ Nueva API sin context
                   ],
                 ),
               ],
@@ -165,7 +171,8 @@ class ResponsiveDemo extends StatelessWidget {
             height: 80.size, // ✨ Nueva API sin context
             decoration: BoxDecoration(
               color: Colors.blue[100],
-              borderRadius: BorderRadius.circular(8.radius), // ✨ Nueva API sin context
+              borderRadius:
+                  BorderRadius.circular(8.radius), // ✨ Nueva API sin context
             ),
             child: Center(
               child: Text(
@@ -181,7 +188,8 @@ class ResponsiveDemo extends StatelessWidget {
             height: 80.size, // ✨ Nueva API sin context
             decoration: BoxDecoration(
               color: Colors.green[100],
-              borderRadius: BorderRadius.circular(16.radius), // ✨ Nueva API sin context
+              borderRadius:
+                  BorderRadius.circular(16.radius), // ✨ Nueva API sin context
             ),
             child: Center(
               child: Text(
@@ -251,9 +259,9 @@ class ResponsiveDemo extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 16.size),
-            
+
             // Flex multi-plataforma
             Text(
               'Flex Multi-Plataforma (.flexValue())',
@@ -266,7 +274,7 @@ class ResponsiveDemo extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 4.flexValueWithContext(context, mobile: 3, tablet: 5, desktop: 6),
+                  flex: rflexValue(mobile: 3, tablet: 5, desktop: 6),
                   child: Container(
                     height: 50.size,
                     color: Colors.purple[300],
@@ -283,7 +291,7 @@ class ResponsiveDemo extends StatelessWidget {
                 ),
                 SizedBox(width: 8.size),
                 Expanded(
-                  flex: 2.flexValueWithContext(context, mobile: 2, tablet: 2, desktop: 1),
+                  flex: rflexValue(mobile: 2, tablet: 2, desktop: 1),
                   child: Container(
                     height: 50.size,
                     color: Colors.orange[300],
@@ -318,11 +326,11 @@ class ResponsiveDemo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header con icono
-              Row(
+            Row(
               children: [
                 Icon(
                   Icons.notifications_active,
-                  size: 28.sizeWithContext(context, mobile: 24, tablet: 32, desktop: 36),
+                  size: rsize(mobile: 24, tablet: 32, desktop: 36),
                   color: Colors.blue[600],
                 ),
                 SizedBox(width: 12.size),
@@ -350,9 +358,9 @@ class ResponsiveDemo extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             SizedBox(height: 16.size),
-            
+
             // Contenido
             Container(
               padding: EdgeInsets.all(12.size),
@@ -365,14 +373,14 @@ class ResponsiveDemo extends StatelessWidget {
                 style: TextStyle(fontSize: 2.5.sp),
               ),
             ),
-            
+
             SizedBox(height: 16.size),
-            
+
             // Botones de acción
             Row(
               children: [
                 Expanded(
-                  flex: 2.flexValueWithContext(context, mobile: 1, tablet: 2, desktop: 2),
+                  flex: rflexValue(mobile: 1, tablet: 2, desktop: 2),
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(

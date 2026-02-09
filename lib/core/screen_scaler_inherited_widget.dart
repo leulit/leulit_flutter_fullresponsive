@@ -15,7 +15,8 @@ class ScreenScalerInheritedWidget extends InheritedWidget {
   /// Método estático para obtener la instancia y suscribir al widget llamador.
   static ScreenScalerInheritedWidget? of(BuildContext context) {
     // dependOnInheritedWidgetOfExactType es el mecanismo de suscripción eficiente.
-    return context.dependOnInheritedWidgetOfExactType<ScreenScalerInheritedWidget>();
+    return context
+        .dependOnInheritedWidgetOfExactType<ScreenScalerInheritedWidget>();
   }
 
   /// CLAVE: Solo notifica a los suscriptores si el objeto 'info' ha cambiado.
